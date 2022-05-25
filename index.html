@@ -1,0 +1,387 @@
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>GitHub Action simple analyzer</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="./icon.png" rel="icon">
+    </head>
+    <body class="h-full bg-gradient-to-r from-white to-blue-400">
+        <div class="container py-4 mx-auto" id="application">
+            <div class="container mt-12 mx-auto">
+                <div class="block uppercase text-white font-semibold text-xs tracking-widest">
+                    <nav class="flex items-center space-x-4" aria-label="Tabs">
+                        <span class="pr-6 py-2 font-medium text-sm rounded-md">
+                            <img src="./icon.png" alt="" class="w-12">
+                        </span>
+                        <span class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50" :class="getNavigationClass('log')" @click="tab = 'log'">
+                            Raw log
+                        </span>
+                        <div class="flex space-x-4" v-if="tables.logs.items.length > 0">
+                            <span class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50" :class="getNavigationClass('table')" @click="tab = 'table'">
+                                Table of logs ({{ tables.logs.items.length }})
+                            </span>
+                            <span class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50" :class="getNavigationClass('repositories')" @click="tab = 'repositories'">
+                                Repositories summary ({{ repositories.length }})
+                            </span>
+                            <span class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50" :class="getNavigationClass('authors')" @click="tab = 'authors'">
+                                Authors summary ({{ authors.length }})
+                            </span>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="container my-4 mx-auto bg-white rounded-xl p-4 shadow flex">
+                <div class="flex-1 p-4" v-if="tab === 'log'">
+                    <textarea class="w-full text-xs font-mono shadow border rounded-xl p-3" name="log" id="log" rows="20" v-model="input">
+                    </textarea>
+                </div>
+
+                <div class="flex-1 p-4" v-if="tab === 'table'">
+                    <table class="w-full border-collapse border table-auto mt-4 text-sm">
+                        <thead>
+                            <tr class="text-left">
+                                <th class="border p-2 cursor-pointer" @click="filterLogsBy('date')">Date</th>
+                                <th class="border p-2 cursor-pointer" @click="filterLogsBy('slug')">Repository</th>
+                                <th class="border p-2 cursor-pointer" @click="filterLogsBy('quantity')">Quantity</th>
+                                <th class="border p-2 cursor-pointer" @click="filterLogsBy('total')">Price</th>
+                                <th class="border p-2 w-px">Unit</th>
+                                <th class="border p-2 cursor-pointer" @click="filterLogsBy('author')">Author</th>
+                                <th class="border p-2">Actions workflow file</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="log in logs">
+                                <td class="border p-2">
+                                    {{ log.date }}
+                                    <div class="text-gray-500 text-xs">
+                                        {{ log.dateForHumans }}
+                                    </div>
+                                </td>
+                                <td class="border p-2">
+                                    <div class="text-gray-500 text-xs">
+                                        {{ log.repository.namespace }}
+                                    </div>
+                                    <div class="relative flex items-center py-0.5 text-sm">
+                                        <span class="absolute flex-shrink-0 flex items-center justify-center">
+                                            <span class="h-3 w-3 rounded-full" :class="log.repository.color"></span>
+                                        </span>
+                                        <span class="ml-5 text-gray-900">{{ log.repository.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="border p-2">{{ log.quantity }}</td>
+                                <td class="border p-2">
+                                    <div class="text-gray-500 text-xs">
+                                        {{ log.quantity }} &times; {{ log.price }}
+                                    </div>
+                                    ${{ log.total }}
+                                </td>
+                                <td class="border p-2">
+                                    <img :src="getUnitLogo(log.unit)" :alt="log.unit" :title="log.unit" class="w-8">
+                                </td>
+                                <td class="border p-2">
+                                    <a :href="'https://github.com/' + log.author" class="flex items-center" target="_blank" v-if="log.author">
+                                        <img :src="'https://github.com/' + log.author + '.png'" class="w-6 h-6 rounded-full mr-2" :alt="log.author">
+                                        {{ log.author }}
+                                    </a>
+                                    <span v-else>
+                                        unknown
+                                    </span>
+                                </td>
+                                <td class="border p-2">
+                                    {{ log.workflow.replace('.github/workflows/', '') }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="border p-2" colspan="2"></td>
+                                <td class="border p-2">
+                                    <span class="text-gray-500">&Sigma; =</span> {{ totalQuantity }}
+                                </td>
+                                <td class="border p-2">
+                                    <span class="text-gray-500">&Sigma; =</span> ${{ totalPrice }}
+                                </td>
+                                <td class="border p-2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex-1 p-4" v-if="tab === 'repositories'">
+                    <table class="w-full border-collapse border table-fixed mt-4 text-sm">
+                        <thead>
+                            <tr class="text-left">
+                                <th class="w-1/2 border p-2">Repository</th>
+                                <th class="border p-2">Quantity</th>
+                                <th class="border p-2 text-gray-500 font-normal">Quantity per cent</th>
+                                <th class="border p-2">Total price</th>
+                                <th class="border p-2 text-gray-500 font-normal">Price per cent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="repository in repositories">
+                                <td class="border p-2">
+                                    <div class="text-gray-500 text-xs">
+                                        {{ repository.namespace }}
+                                    </div>
+                                    <div class="relative flex items-center py-0.5 text-sm">
+                                        <span class="absolute flex-shrink-0 flex items-center justify-center">
+                                            <span class="h-3 w-3 rounded-full" :class="repository.color"></span>
+                                        </span>
+                                        <span class="ml-5 text-gray-900">{{ repository.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="border p-2">{{ quantityPerRepository(repository) }}</td>
+                                <td class="border p-2 text-gray-500">{{ (quantityPerRepository(repository) * 100 / totalQuantity).toFixed(2) }}%</td>
+                                <td class="border p-2">${{ pricePerRepository(repository) }}</td>
+                                <td class="border p-2 text-gray-500">{{ (pricePerRepository(repository) * 100 / totalPrice).toFixed(2) }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex-1 p-4" v-if="tab === 'authors'">
+                    <table class="w-full border-collapse border table-fixed mt-4 text-sm">
+                        <thead>
+                            <tr class="text-left">
+                                <th class="w-1/2 border p-2">Author</th>
+                                <th class="border p-2">Quantity</th>
+                                <th class="border p-2 text-gray-500 font-normal">Quantity per cent</th>
+                                <th class="border p-2">Total price</th>
+                                <th class="border p-2 text-gray-500 font-normal">Price per cent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="author in authors" class="h-12">
+                                <td class="border p-2">
+                                    <a :href="'https://github.com/' + author" class="flex items-center" target="_blank" v-if="author">
+                                        <img :src="'https://github.com/' + author + '.png'" class="w-6 h-6 rounded-full mr-2" :alt="author">
+                                        {{ author }}
+                                    </a>
+                                    <span class="ml-8" v-else>unknown author</span>
+                                </td>
+                                <td class="border p-2">{{ quantityPerAuthor(author) }}</td>
+                                <td class="border p-2 text-gray-500">{{ (quantityPerAuthor(author) * 100 / totalQuantity).toFixed(2) }}%</td>
+                                <td class="border p-2">${{ pricePerAuthor(author) }}</td>
+                                <td class="border p-2 text-gray-500">{{ (pricePerAuthor(author) * 100 / totalPrice).toFixed(2) }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="container mt-6 mb-12 mx-auto">
+                <div class="block uppercase text-white font-semibold text-xs tracking-widest">
+                    <nav class="flex items-center justify-end space-x-4" aria-label="Tabs">
+                        <span class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25" @click="clear()" v-if="input">
+                            Clear data
+                        </span>
+                        <span class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25" @click="document.getElementById('uploader').click()">
+                            Upload CSV file
+                            <input type="file" ref="file" id="uploader" accept=".csv" class="hidden" @change="upload()">
+                        </span>
+                        <span class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25" @click="seed()">
+                            Seed example data
+                        </span>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="w-full flex items-center justify-center text-white">
+                <span class="mr-2 font-semibold text-xs tracking-widest">developed by</span>
+                <a href="https://blumilk.pl/" target="_blank">
+                    <img src="blumilk.png" alt="Blumilk" class="w-32">
+                </a>
+            </div>
+        </div>
+    </body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js" integrity="sha512-XdUZ5nrNkVySQBnnM5vzDqHai823Spoq1W3pJoQwomQja+o4Nw0Ew1ppxo5bhF2vMug6sfibhKWcNJsG8Vj9tg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js" integrity="sha512-EbdJQSugx0nVWrtyK3JdQQ/03mS3Q1UiAhRtErbwl1YL/+e2hZdlIcSURxxh7WXHTzn83sjlh2rysACoJGfb6g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+      const sample = `Date,Product,SKU,Quantity,Unit Type,Price Per Unit ($),Multiplier,Owner,Repository Slug,Username,Actions Workflow,Notes
+2022-05-20,Actions,Compute - UBUNTU,2,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/check-pr.yml,
+2022-05-20,Actions,Compute - UBUNTU,9,minute,0.008,1.0,galaxy,caprica,octocat,.github/workflows/check-pr.yml,
+2022-05-20,Actions,Compute - UBUNTU,8,minute,0.008,1.0,galaxy,mustafar,octocat,.github/workflows/test.yml,
+2022-05-20,Actions,Compute - UBUNTU,9,minute,0.008,1.0,galaxy,caprica,octocat,.github/workflows/lint.yml,
+2022-05-20,Actions,Compute - UBUNTU,3,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/behat.yml,
+2022-05-20,Actions,Compute - UBUNTU,3,minute,0.008,1.0,galaxy,mustafar,octocat,.github/workflows/check-pr.yml,
+2022-05-20,Actions,Compute - UBUNTU,2,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/behat.yml,
+2022-05-20,Actions,Compute - UBUNTU,15,minute,0.008,1.0,galaxy,caprica,octocat,.github/workflows/lint.yml,
+2022-05-20,Actions,Compute - WINDOWS,7,minute,0.016,1.0,galaxy,mustafar,octocat,.github/workflows/test-windows.yml,
+2022-05-20,Actions,Compute - UBUNTU,11,minute,0.008,1.0,galaxy,caprica,octocat,.github/workflows/check-pr.yml,
+2022-05-20,Actions,Compute - UBUNTU,2,minute,0.008,1.0,galaxy,mustafar,octocat,.github/workflows/test.yml,
+2022-05-20,Actions,Compute - UBUNTU,1,minute,0.008,1.0,galaxy,trantor,dependabot[bot],.github/workflows/check-pr.yml,
+2022-05-20,Actions,Compute - UBUNTU,7,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/behat.yml,
+`
+
+      const colors = [
+        'bg-gray-400',
+        'bg-blue-400',
+        'bg-red-400',
+        'bg-green-400',
+        'bg-yellow-400',
+        'bg-indigo-400',
+        'bg-purple-400',
+        'bg-pink-400',
+      ]
+
+      new Vue({
+        el: '#application',
+        data () {
+          return {
+            tab: 'log',
+            input: '',
+            tables: {
+              logs: {
+                items: [],
+                sort: 'date',
+                order: 'asc'
+              }
+            },
+            dictionaries: {
+              authors: {},
+              repositories: {},
+            },
+          }
+        },
+        computed: {
+          logs () {
+            let data = this.tables.logs.items
+
+            if (this.tables.logs.sort) {
+              data = data.sort((a, b) => {
+                if (!isNaN(a[this.tables.logs.sort]) && !isNaN(b[this.tables.logs.sort])) {
+                  return a[this.tables.logs.sort] > b[this.tables.logs.sort]
+                }
+
+                return b[this.tables.logs.sort] > a[this.tables.logs.sort]
+              })
+            }
+
+            if (this.tables.logs.order === 'desc') {
+              data = data.reverse()
+            }
+
+            return data
+          },
+          repositories () {
+            return Object.values(this.dictionaries.repositories).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase())
+          },
+          authors () {
+            return Object.values(this.dictionaries.authors).sort((a, b) => a.toLowerCase() > b.toLowerCase())
+          },
+          totalQuantity () {
+            return this.tables.logs.items.reduce((a, b) => a + parseInt(b.quantity), 0)
+          },
+          totalPrice () {
+            return this.tables.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
+          },
+        },
+        methods: {
+          parseLineToLog (line) {
+            const repository = {
+              slug: line[7] + '/' + line[8],
+              name: line[8],
+              namespace: line[7] ? line[7] : 'unknown',
+              color: colors[this.repositories.length % colors.length]
+            }
+
+            if (!this.dictionaries.repositories[repository.name]) {
+              this.dictionaries.repositories[repository.name] = repository
+              this.dictionaries.repositories = JSON.parse(JSON.stringify(this.dictionaries.repositories))
+            } else {
+              repository.color = this.dictionaries.repositories[repository.name].color
+            }
+
+            let author = line[9]
+            if (author === 'dependabot[bot]') {
+              author = 'dependabot'
+            }
+
+            if (!this.dictionaries.authors[author]) {
+              this.dictionaries.authors[author] = author
+              this.dictionaries.authors = JSON.parse(JSON.stringify(this.dictionaries.authors))
+            }
+
+            return {
+              date: line[0],
+              dateForHumans: moment(line[0]).fromNow(),
+              product: line[1],
+              repository: repository,
+              slug: repository.slug,
+              quantity: parseInt(line[3]),
+              unit: line[2].replace('Compute - ', '').toLowerCase(),
+              price: line[5],
+              total: (line[3] * line[5]).toFixed(3),
+              author: author,
+              workflow: line[10],
+              notes: line[11],
+            }
+          },
+          filterLogsBy (tag) {
+            if (this.tables.logs.sort === tag) {
+              this.tables.logs.order = this.tables.logs.order === 'desc' ? 'asc' : 'desc'
+              return
+            }
+
+            this.tables.logs.sort = tag
+            this.tables.logs.order = 'desc'
+          },
+          quantityPerAuthor (author) {
+            return this.tables.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseInt(b.quantity), 0)
+          },
+          pricePerAuthor (author) {
+            return this.tables.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
+          },
+          quantityPerRepository (repository) {
+            return this.tables.logs.items.filter(log => log.repository.name === repository.name).reduce((a, b) => a + parseInt(b.quantity), 0)
+          },
+          pricePerRepository (repository) {
+            return this.tables.logs.items.filter(log => log.repository.name === repository.name).reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
+          },
+          getUnitLogo (unit) {
+            return './icons/units/' + unit.toLowerCase() + '.png'
+          },
+          getNavigationClass (tab) {
+            if (tab === this.tab) {
+              return 'bg-blue-500'
+            }
+
+            return 'bg-blue-400 hover:bg-opacity-75'
+          },
+          clear () {
+            this.tab = 'log'
+            this.input = ''
+            this.tables.logs.items = []
+          },
+          upload () {
+            const file = this.$refs.file.files[0]
+            const reader = new FileReader()
+
+            reader.onload = result => this.input = result.target.result
+            reader.readAsText(file)
+          },
+          seed () {
+            this.input = sample
+          }
+        },
+        watch: {
+          input () {
+            this.dictionaries.authors = {}
+            this.dictionaries.repositories = {}
+
+            if (!this.input) {
+              return
+            }
+
+            let data = Papa.parse(this.input).data.filter(line => line.length === 12)
+            data.shift()
+            data = data.map(line => this.parseLineToLog(line))
+
+            this.tables.logs.items = data
+          }
+        }
+      })
+    </script>
+</html>
