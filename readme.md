@@ -4,7 +4,7 @@
 ## Why?
 This native solution is probably nice only for your accountants:
 
-![images/screenshot-gh.png](images/screenshot-gh.png)
+![images/screenshot-gh.png](public/images/screenshot-gh.png)
 
 And this generated report is nice when it's a 10-rows long file or when you are a robot:
 
@@ -27,6 +27,6 @@ Date,Product,SKU,Quantity,Unit Type,Price Per Unit ($),Multiplier,Owner,Reposito
 
 This really simple Vue.js application transforms your data from raw CSV to sortable and colorful tables with indicators which repositories and developers are responsible for your organization's actions. All data stays in your browser as the application doesn't have any backend or even external calls except fetching a few JavaScript libraries and CSS stylesheets.
 
-![images/screenshot-gh.png](images/screenshot.png)
+![images/screenshot-gh.png](public/images/screenshot.png)
 
 You can download your usage report here: https://github.com/organizations/<your-organization-name>/settings/billing
