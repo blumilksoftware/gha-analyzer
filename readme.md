@@ -1,32 +1,41 @@
-## GitHub Actions simple analyzer
-> Created in the absence of a native GitHub solution to understand your organization's actions quotas. 
+## @blumilksoftware/gha-analyzer
+### About application
+> placeholder
 
-## Why?
-This native solution is probably nice only for your accountants:
+### Local development
+```
+cp .env.example .env
+make init
+make dev
+```
+Application will be running under [localhost:63851](localhost:63851) and [http://gha-analyzer.blumilk.localhost/](http://gha-analyzer.blumilk.localhost/) in Blumilk traefik environment. If you don't have a Blumilk traefik environment set up yet, follow the instructions from this [repository](https://github.com/blumilksoftware/environment).
 
-![images/screenshot-gh.png](images/screenshot-gh.png)
-
-And this generated report is nice when it's a 10-rows long file or when you are a robot:
-
-```csv
-Date,Product,SKU,Quantity,Unit Type,Price Per Unit ($),Multiplier,Owner,Repository Slug,Username,Actions Workflow,Notes
-2022-05-20,Actions,Compute - UBUNTU,2,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/check-pr.yml,
-2022-05-20,Actions,Compute - UBUNTU,9,minute,0.008,1.0,galaxy,caprica,octocat,.github/workflows/check-pr.yml,
-2022-05-20,Actions,Compute - UBUNTU,8,minute,0.008,1.0,galaxy,mustafar,octocat,.github/workflows/test.yml,
-2022-05-20,Actions,Compute - UBUNTU,9,minute,0.008,1.0,galaxy,caprica,octocat,.github/workflows/lint.yml,
-2022-05-20,Actions,Compute - UBUNTU,3,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/behat.yml,
-2022-05-20,Actions,Compute - UBUNTU,3,minute,0.008,1.0,galaxy,mustafar,octocat,.github/workflows/check-pr.yml,
-2022-05-20,Actions,Compute - UBUNTU,2,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/behat.yml,
-2022-05-20,Actions,Compute - UBUNTU,15,minute,0.008,1.0,galaxy,caprica,octocat,.github/workflows/lint.yml,
-2022-05-20,Actions,Compute - WINDOWS,7,minute,0.016,1.0,galaxy,mustafar,octocat,.github/workflows/test-windows.yml,
-2022-05-20,Actions,Compute - UBUNTU,11,minute,0.008,1.0,galaxy,caprica,octocat,.github/workflows/check-pr.yml,
-2022-05-20,Actions,Compute - UBUNTU,2,minute,0.008,1.0,galaxy,mustafar,octocat,.github/workflows/test.yml,
-2022-05-20,Actions,Compute - UBUNTU,1,minute,0.008,1.0,galaxy,trantor,dependabot[bot],.github/workflows/check-pr.yml,
-2022-05-20,Actions,Compute - UBUNTU,7,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/behat.yml,
+#### Commands
+Before running any of the commands below, you must run shell:
+```
+make shell
 ```
 
-This really simple Vue.js application transforms your data from raw CSV to sortable and colorful tables with indicators which repositories and developers are responsible for your organization's actions. All data stays in your browser as the application doesn't have any backend or even external calls except fetching a few JavaScript libraries and CSS stylesheets.
+| Command                 | Task                                        |
+|:------------------------|:--------------------------------------------|
+| `composer <command>`    | Composer                                    |
+| `composer test`         | Runs backend tests                          |
+| `composer analyse`      | Runs Larastan analyse for backend files     |
+| `composer cs`           | Lints backend files                         |
+| `composer csf`          | Lints and fixes backend files               |
+| `php artisan <command>` | Artisan commands                            |
+| `npm run dev`           | Compiles and hot-reloads for development    |
+| `npm run build`         | Compiles and minifies for production        |
+| `npm run lint`          | Lints frontend files                        |
+| `npm run lintf`         | Lints and fixes frontend files              |
+| `npm run tsc`           | Runs TypeScript checker                     |
 
-![images/screenshot-gh.png](images/screenshot.png)
 
-You can download your usage report here: https://github.com/organizations/<your-organization-name>/settings/billing
+#### Containers
+
+| service    | container name            | default host port               |
+|:-----------|:--------------------------|:--------------------------------|
+| `app`      | `gha-analyzer-app-dev`     | [63851](http://localhost:63851) |
+| `database` | `gha-analyzer-db-dev`      | 63853                           |
+| `redis`    | `gha-analyzer-redis-dev`   | 63852                           |
+| `mailpit`  | `gha-analyzer-mailpit-dev` | 63854                           |
