@@ -1,0 +1,105 @@
+networks:
+    gha-analyzer-dev:
+        driver: bridge
+    traefik-proxy-blumilk-local:
+        external: true
+
+volumes:
+    gha-analyzer-postgres-data:
+        name: gha-analyzer-postgres-data
+    gha-analyzer-redis-data:
+        name: gha-analyzer-redis-data
+
+services:
+    app:
+        build:
+            context: ./environment/dev/app
+            dockerfile: Dockerfile
+            args:
+                - INSTALL_XDEBUG=${DOCKER_INSTALL_XDEBUG:-true}
+                - USER_ID=${DOCKER_HOST_USER_ID:-1000}
+        labels:
+            - "traefik.enable=true"
+            - "traefik.blumilk.environment=true"
+            # HTTP
+            - "traefik.http.routers.gha-analyzer-http-router.rule=Host(`gha-analyzer.blumilk.localhost`)"
+            - "traefik.http.routers.gha-analyzer-http-router.entrypoints=web"
+            # HTTP to HTTPS redirect
+            #      - "traefik.http.routers.gha-analyzer-http-router.middlewares=https-redirect@file"
+            # HTTPS
+            - "traefik.http.routers.gha-analyzer-https-router.rule=Host(`gha-analyzer.blumilk.localhost`)"
+            - "traefik.http.routers.gha-analyzer-https-router.entrypoints=websecure"
+            - "traefik.http.routers.gha-analyzer-https-router.tls=true"
+        container_name: gha-analyzer-app-dev
+        working_dir: /application
+        volumes:
+            - ./environment/dev/app/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./environment/dev/app/php.ini:/usr/local/etc/php/conf.d/zzz-overrides.ini:ro
+            - ./environment/dev/app/php-fpm.conf:/usr/local/etc/php-fpm.d/zzz-overrides.conf:ro
+            - ./environment/dev/app/supervisord.conf:/etc/supervisor/custom-supervisord.conf:ro
+            - .:/application
+        ports:
+            - ${DOCKER_APP_HOST_PORT:-63851}:80
+        networks:
+            - gha-analyzer-dev
+            - traefik-proxy-blumilk-local
+        restart: unless-stopped
+        depends_on:
+            database:
+                condition: service_healthy
+
+    database:
+        image: postgres:16.3-alpine3.18
+        container_name: gha-analyzer-db-dev
+        environment:
+            - POSTGRES_USER=${DB_USERNAME}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+            - POSTGRES_DB=${DB_DATABASE}
+            - PGDATA=/var/lib/postgresql/data
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready --dbname ${DB_DATABASE} --username ${DB_USERNAME}"]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+        ports:
+            - ${DOCKER_DATABASE_HOST_PORT:-63853}:5432
+        volumes:
+            - gha-analyzer-postgres-data:/var/lib/postgresql/data
+        networks:
+            - gha-analyzer-dev
+        restart: unless-stopped
+
+    mailpit:
+      image: axllent/mailpit:v1.18.0
+      container_name: gha-analyzer-mailpit-dev
+      labels:
+        - "traefik.enable=true"
+        - "traefik.blumilk.environment=true"
+        # HTTP
+        - "traefik.http.routers.gha-analyzer-mailpit-http-router.rule=Host(`gha-analyzer-mailpit.blumilk.localhost`)"
+        - "traefik.http.routers.gha-analyzer-mailpit-http-router.entrypoints=web"
+        # HTTP to HTTPS redirect
+        #      - "traefik.http.routers.erasmus-mailpit-http-router.middlewares=https-redirect@file"
+        # HTTPS
+        - "traefik.http.routers.gha-analyzer-mailpit-https-router.rule=Host(`gha-analyzer-mailpit.blumilk.localhost`)"
+        - "traefik.http.routers.gha-analyzer-mailpit-https-router.entrypoints=websecure"
+        - "traefik.http.routers.gha-analyzer-mailpit-https-router.tls=true"
+        # LOADBALANCER MAILPIT PORT
+        - "traefik.http.services.gha-analyzer-mailpit.loadbalancer.server.port=8025"
+      networks:
+        - gha-analyzer-dev
+        - traefik-proxy-blumilk-local
+      ports:
+        - ${DOCKER_MAILPIT_DASHBOARD_HOST_PORT:-63854}:8025
+      restart: unless-stopped
+
+    redis:
+        image: redis:7.2.4-alpine3.19
+        container_name: gha-analyzer-redis-dev
+        ports:
+            - ${DOCKER_REDIS_HOST_PORT:-63852}:6379
+        volumes:
+            - gha-analyzer-redis-data:/data
+        networks:
+            - gha-analyzer-dev
+        restart: unless-stopped
