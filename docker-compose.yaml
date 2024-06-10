@@ -103,3 +103,10 @@ services:
         networks:
             - gha-analyzer-dev
         restart: unless-stopped
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8080:8080
+        networks:
+            - gha-analyzer-dev
