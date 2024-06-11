@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -31,6 +32,18 @@ class GithubController extends Controller
 
         Auth::login($user);
 
-        return redirect("/");
+        $redirect_url = "https://github.com/apps/gha-analyzer";
+
+        $response = Http::withHeaders([
+            "Authorization" => "Bearer " . $githubUser->token,
+        ])->get("https://api.github.com/user/installations");
+
+        foreach ($response->json("installations") as $installation) {
+            if ($installation["app_id"] === 918356) {
+                $redirect_url = "/";
+            }
+        }
+
+        return redirect($redirect_url);
     }
 }
