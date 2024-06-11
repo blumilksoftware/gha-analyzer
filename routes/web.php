@@ -2,14 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\GithubController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Response;
-use Laravel\Socialite\Facades\Socialite;
-use App\Http\Controllers\UserController;
 
 Route::get("/", fn(): Response => inertia("Welcome"));
 
-Route::get('/auth/redirect', function () {
-    return Socialite::driver('github')->redirect();
-});
-Route::get('/auth/callback', [UserController::class, 'login']);
+Route::get("/auth/redirect", [GithubController::class, "redirect"]);
+Route::get("/auth/callback", [GithubController::class, "callback"]);
