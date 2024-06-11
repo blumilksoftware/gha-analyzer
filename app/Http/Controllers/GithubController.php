@@ -7,15 +7,16 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class GithubController extends Controller
 {
-    public function redirect()
+    public function redirect(): RedirectResponse
     {
         return Socialite::driver("github")->redirect();
     }
 
-    public function callback()
+    public function callback(): RedirectResponse
     {
         $githubUser = Socialite::driver("github")->user();
 
