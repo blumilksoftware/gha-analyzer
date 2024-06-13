@@ -8,24 +8,24 @@ use Illuminate\Support\Facades\Http;
 
 class PermissionService
 {
-    public function checkPermissions(): bool
+    public function checkGitHubAppInstallation(int $organizationId): bool
     {
-        $permissions_given = false;
+        $permissionsGiven = false;
 
         $response = Http::withHeaders([
             "Authorization" => "Bearer " . auth()->user()->github_token,
-        ])->get("https://api.github.com/user/installations");
+        ])->get("https://api.github.com/user/orgs");
 
-        if ($response->json("installations") !== null) {
-            foreach ($response->json("installations") as $installation) {
-                if ($installation["app_id"] === intval(env("GITHUB_APP_ID"))) {
-                    $permissions_given = true;
+        if ($response->json() !== null) {
+            foreach ($response->json() as $organization) {
+                if ($organization["id"] === $organizationId) {
+                    $permissionsGiven = true;
 
                     break;
                 }
             }
         }
 
-        return $permissions_given;
+        return $permissionsGiven;
     }
 }

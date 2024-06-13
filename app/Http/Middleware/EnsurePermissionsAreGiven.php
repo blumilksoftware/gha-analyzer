@@ -13,8 +13,10 @@ class EnsurePermissionsAreGiven
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ((new PermissionService())->checkPermissions() === false) {
-            return redirect(env("GITHUB_APP_URL"));
+        $organizationId = intval($request->organizationId);
+
+        if ((new PermissionService())->checkGitHubAppInstallation($organizationId) === false) {
+            return redirect("/");
         }
 
         return $next($request);
