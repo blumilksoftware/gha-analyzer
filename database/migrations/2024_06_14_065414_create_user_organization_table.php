@@ -11,8 +11,8 @@ return new class() extends Migration {
     {
         Schema::create("user_organization", function (Blueprint $table): void {
             $table->id();
-            $table->bigInteger("user_id");
-            $table->bigInteger("organization_id");
+            $table->foreign("user_id")->references("id")->on("users")->onDelete("cascade");
+            $table->foreign("organization_id")->references("id")->on("organizations")->onDelete("cascade");
         });
     }
 
