@@ -12,6 +12,12 @@ class Organization extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        "name",
+        "github_id",
+        "avatar_url",
+    ];
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, "user_organization");
