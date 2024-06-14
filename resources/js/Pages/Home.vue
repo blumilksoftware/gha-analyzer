@@ -4,4 +4,5 @@ import { Link, Head } from '@inertiajs/vue3'
 <template>
     <Head>Home</Head>
     <h1>Home</h1>
+    <Link href="/">Home link</Link>
 </template>
