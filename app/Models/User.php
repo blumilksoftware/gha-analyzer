@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -36,6 +37,11 @@ class User extends Authenticatable
         "password",
         "remember_token",
     ];
+
+    public function organizations(): BelongsToMany
+    {
+        return $this->belongsToMany(Organization::class, "user_organization");
+    }
 
     protected function casts(): array
     {
