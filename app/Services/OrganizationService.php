@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTO\OrganizationDTO;
 use App\Models\Organization;
 use App\Models\User;
 
 class OrganizationService
 {
-    public function create(array $organization): void
+    public function create(OrganizationDTO $organization): void
     {
-        if ($organization["type"] === "Organization") {
-            Organization::create([
-                "name" => $organization["login"],
-                "github_id" => $organization["id"],
-                "avatar_url" => $organization["avatar_url"],
-            ]);
-        }
+        Organization::create([
+            "name" => $organization->name,
+            "github_id" => $organization->github_id,
+            "avatar_url" => $organization->avatar_url,
+        ]);
     }
 
     public function removeMember(array $member, array $organizationData): void

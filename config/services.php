@@ -23,4 +23,7 @@ return [
         "redirect" => env("GITHUB_REDIRECT_URL"),
         "webhook_secret" => env("GITHUB_WEBHOOK_SECRET"),
     ],
+    "organization" => [
+        "type" => "Organization",
+    ],
 ];
