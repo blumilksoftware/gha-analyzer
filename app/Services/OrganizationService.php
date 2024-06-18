@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTO\MemberDTO;
 use App\DTO\OrganizationDTO;
 use App\Models\Organization;
 use App\Models\User;
@@ -14,15 +15,16 @@ class OrganizationService
     {
         Organization::create([
             "name" => $organization->name,
-            "github_id" => $organization->github_id,
-            "avatar_url" => $organization->avatar_url,
+            "github_id" => $organization->githubId,
+            "avatar_url" => $organization->avatarUrl,
         ]);
     }
 
-    public function removeMember(array $member, array $organizationData): void
+    public function removeMember(MemberDTO $member, OrganizationDTO $organizationData): void
     {
-        $user = User::where("github_id", $member["id"])->first();
-        $organization = Organization::where("github_id", $organizationData["id"])->first();
-        $user->organizations()->detach($organization["id"]);
+        $user = User::query()->where("github_id", $member->githubId)->first();
+        $organization = Organization::query()->where("github_id", $organizationData->githubId)->first();
+
+        $user->organizations()->detach($organization->id);
     }
 }

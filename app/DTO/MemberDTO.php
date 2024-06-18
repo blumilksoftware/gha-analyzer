@@ -4,22 +4,18 @@ declare(strict_types=1);
 
 namespace App\DTO;
 
-class OrganizationDTO
+class MemberDTO
 {
     public function __construct(
-        public string $name,
         public int $githubId,
-        public string $avatarUrl,
     ) {}
 
     public static function createFromArray(array $data): self
     {
-        $organization = new self(
-            $data["login"],
+        $member = new self(
             $data["id"],
-            $data["avatar_url"],
         );
 
-        return $organization;
+        return $member;
     }
 }

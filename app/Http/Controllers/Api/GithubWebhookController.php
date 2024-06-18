@@ -10,15 +10,12 @@ use Illuminate\Http\Request;
 
 class GithubWebhookController extends Controller
 {
-    protected $webhookService;
+    public function __construct(
+        protected GithubWebhookService $webhookService,
+    ) {}
 
-    public function __construct()
+    public function __invoke(Request $request): void
     {
-        $this->webhookService = new GithubWebhookService();
-    }
-
-    public function handle(Request $request): void
-    {
-        $this->webhookService->handle($request);
+        $this->webhookService->handleRequest($request);
     }
 }
