@@ -20,6 +20,8 @@ const sample = `Date,Product,SKU,Quantity,Unit Type,Price Per Unit ($),Multiplie
 const logs = ref('')
 const logs_loaded = ref(false)
 const titleClass = ref('title')
+const files = ref([]);
+const fileInput = ref(null);
 
 function seed () {
     logs.value = sample
@@ -29,6 +31,22 @@ function clear () {
     logs.value = ''
     logs_loaded.value = false
 }
+function upload () {
+            const file = this.$refs.file.files[0]
+            const reader = new FileReader()
+
+            reader.onload = result => this.input = result.target.result
+            reader.readAsText(file)
+}
+
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const onFileChange = (event) => {
+  const selectedFiles = Array.from(event.target.files);
+  files.value.push(...selectedFiles);
+};
 
 </script>
 <style>
@@ -50,7 +68,10 @@ function clear () {
         <div class="block uppercase text-white font-semibold text-xs tracking-widest">
             <nav class="flex items-center justify-end space-x-4">
                 <span @click="clear" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Clear Data</span>
-                <span @click="clear" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Upload CSV File</span>
+                <span class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25" @click="triggerFileInput">
+                    Upload CSV file
+                    <input type="file" ref="fileInput" id="uploader" accept=".csv" class="hidden" @change="onFileChange">
+                </span>
                 <span @click="seed" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Seed Example Data</span>
             </nav>
         </div>
