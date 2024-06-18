@@ -1,5 +1,5 @@
 <script setup>
-import { Link, Head } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 const sample = `Date,Product,SKU,Quantity,Unit Type,Price Per Unit ($),Multiplier,Owner,Repository Slug,Username,Actions Workflow,Notes
@@ -19,7 +19,6 @@ const sample = `Date,Product,SKU,Quantity,Unit Type,Price Per Unit ($),Multiplie
 `
 const logs = ref('')
 const logs_loaded = ref(false)
-const titleClass = ref('title')
 const files = ref([]);
 const fileInput = ref(null);
 
@@ -30,13 +29,6 @@ function seed () {
 function clear () {
     logs.value = ''
     logs_loaded.value = false
-}
-function upload () {
-            const file = this.$refs.file.files[0]
-            const reader = new FileReader()
-
-            reader.onload = result => this.input = result.target.result
-            reader.readAsText(file)
 }
 
 const triggerFileInput = () => {
