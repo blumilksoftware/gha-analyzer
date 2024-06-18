@@ -52,17 +52,17 @@ const onFileChange = (event) => {
     <main>
         <slot></slot>
         <div class="container mt-6 mb-12 mx-auto">
-        <div class="block uppercase text-white font-semibold text-xs tracking-widest">
-            <nav class="flex items-center justify-end space-x-4">
-                <span @click="clear" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Clear Data</span>
-                <span class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25" @click="triggerFileInput">
-                    Upload CSV file
-                    <input type="file" ref="fileInput" id="uploader" accept=".csv" class="hidden" @change="onFileChange">
-                </span>
-                <span @click="seed" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Seed Example Data</span>
-            </nav>
+            <div class="block uppercase text-white font-semibold text-xs tracking-widest">
+                <nav class="flex items-center justify-end space-x-4">
+                    <span @click="clear" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Clear Data</span>
+                    <span class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25" @click="triggerFileInput">
+                        Upload CSV file
+                        <input type="file" ref="fileInput" id="uploader" accept=".csv" class="hidden" @change="onFileChange">
+                    </span>
+                    <span @click="seed" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Seed Example Data</span>
+                </nav>
+            </div>
         </div>
-    </div>
     </main>
     <footer>
         <div class="w-full flex items-center justify-center text-white">
