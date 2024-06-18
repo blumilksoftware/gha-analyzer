@@ -18,7 +18,7 @@ class GithubWebhookService
     {
         switch ($this->getActionType($request)) {
             case "created":
-                $data = data_get($request, "installation.account");
+                $data = $request->get("installation")["account"];
 
                 if ($data["type"] === config("services.organization.type")) {
                     $organization = OrganizationDTO::createFromArray($data);
@@ -28,8 +28,8 @@ class GithubWebhookService
 
                 break;
             case "member_removed":
-                $organization = OrganizationDTO::createFromArray(data_get($request, "organization"));
-                $member = MemberDTO::createFromArray(data_get($request, "membership.user"));
+                $organization = OrganizationDTO::createFromArray($request->get("organization"));
+                $member = MemberDTO::createFromArray($request->get("membership")["user"]);
 
                 $this->organizationService->removeMember(
                     $member,
