@@ -1,12 +1,6 @@
-<script>
+<script setup>
 import Navbar from './Navbar.vue'
 import { ref } from 'vue'
-
-export default {
-    components: {
-        Navbar,
-    }
-}
 
 const sample = `Date,Product,SKU,Quantity,Unit Type,Price Per Unit ($),Multiplier,Owner,Repository Slug,Username,Actions Workflow,Notes
 2022-05-20,Actions,Compute - UBUNTU,2,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/check-pr.yml,
