@@ -45,14 +45,18 @@ function clear () {
     <div class="container">
 
     </div>
-    <div class="container">
-        <slot></slot>
-        <textarea :value="logs"></textarea>
+    <div class="container my-4 mx-auto bg-white rounded-xl p-4 shadow flex">
+        <div class="flex-1 p-4">
+            <textarea class="w-full text-xs font-mono shadow border rounded-xl p-3" :value="logs" rows="20"></textarea>
+        </div>
     </div>
-    <div>
-        <div>
-            <button @click="clear">Clear Data</button>
-            <button @click="seed">Seed Example Data</button>
+    <div class="container mt-6 mb-12 mx-auto">
+        <div class="block uppercase text-white font-semibold text-xs tracking-widest">
+            <nav class="flex items-center justify-end space-x-4">
+                <span @click="clear" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Clear Data</span>
+                <span @click="seed" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Seed Example Data</span>
+            </nav>
+            
         </div>
     </div>
     <div>

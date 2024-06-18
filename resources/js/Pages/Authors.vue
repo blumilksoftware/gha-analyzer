@@ -1,3 +1,3 @@
 <template>
-    Raw Log
+    Authors
 </template>
