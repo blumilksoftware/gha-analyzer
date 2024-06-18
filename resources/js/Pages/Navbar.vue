@@ -7,7 +7,7 @@ import {Link} from '@inertiajs/vue3'
         <div class="block uppercase text-white font-semibold text-xs tracking-widest">
             <nav class="flex items-center space-x-4" aria-label="Tabs">
                 <span class="pr-6 py-2 font-medium text-sm rounded-md">
-                    <img src="./icon.png" class="w-12">
+                    <img src="icon.png" alt="Logo" class="w-12">
                 </span>
                 <Link href="/"><span class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50 bg-blue-500" href="/table">Raw Log</span></Link>
                 <div class="flex space-x-4">
