@@ -7,6 +7,7 @@ namespace App\Services;
 use App\DTO\MemberDTO;
 use App\DTO\OrganizationDTO;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class GithubWebhookService
 {
@@ -14,22 +15,22 @@ class GithubWebhookService
         protected OrganizationService $organizationService,
     ) {}
 
-    public function handleRequest(Request $request): void
+    public function handle(Collection $data): void
     {
-        switch ($this->getActionType($request)) {
+        switch ($this->getActionType($data)) {
             case "created":
-                $data = $request->get("installation")["account"];
+                $organizationData = $data["installation"]["account"];
 
-                if ($data["type"] === config("services.organization.type")) {
-                    $organization = OrganizationDTO::createFromArray($data);
+                if ($organizationData["type"] === config("services.organization.type")) {
+                    $organization = OrganizationDTO::createFromArray($organizationData);
 
                     $this->organizationService->create($organization);
                 }
 
                 break;
             case "member_removed":
-                $organization = OrganizationDTO::createFromArray($request->get("organization"));
-                $member = MemberDTO::createFromArray($request->get("membership")["user"]);
+                $organization = OrganizationDTO::createFromArray($data["organization"]);
+                $member = MemberDTO::createFromArray($data["membership"]["user"]);
 
                 $this->organizationService->removeMember(
                     $member,
@@ -40,8 +41,8 @@ class GithubWebhookService
         }
     }
 
-    protected function getActionType(Request $request): string
+    protected function getActionType(Collection $data): string
     {
-        return $request->json("action");
+        return $data["action"];
     }
 }

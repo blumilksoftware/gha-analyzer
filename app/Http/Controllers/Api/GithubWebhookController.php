@@ -16,6 +16,7 @@ class GithubWebhookController extends Controller
 
     public function __invoke(Request $request): void
     {
-        $this->webhookService->handleRequest($request);
+        $data = $request->collect();
+        $this->webhookService->handle($data);
     }
 }
