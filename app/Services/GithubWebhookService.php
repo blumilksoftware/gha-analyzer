@@ -9,13 +9,11 @@ use App\Models\User;
 
 class GithubWebhookService
 {
-
     public function createOrganization(
         string $organizationName,
         int $organizationId,
         string $organizationAvatarUrl,
-    ): void
-    {
+    ): void {
         Organization::create([
             "name" => $organizationName,
             "github_id" => $organizationId,
@@ -25,9 +23,8 @@ class GithubWebhookService
 
     public function removeMember(
         int $organizationId,
-        int $memberId
-    ): void
-    {
+        int $memberId,
+    ): void {
         $user = User::query()->where("github_id", $memberId)->first();
         $organization = Organization::query()->where("github_id", $organizationId)->first();
 
