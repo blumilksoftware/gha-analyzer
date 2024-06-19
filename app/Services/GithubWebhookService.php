@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\DTO\MemberDTO;
 use App\DTO\OrganizationDTO;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class GithubWebhookService
