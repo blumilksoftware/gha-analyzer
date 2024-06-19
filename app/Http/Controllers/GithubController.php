@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\AssignUserToOrganizationsService;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class GithubController extends Controller
 {
+    public function __construct(
+        protected AssignUserToOrganizationsService $assignUserService,
+    ) {}
+
     public function redirect(): RedirectResponse
     {
         return Socialite::driver("github")->redirect();
@@ -30,6 +35,8 @@ class GithubController extends Controller
         ]);
 
         Auth::login($user);
+
+        $this->assignUserService->assign();
 
         return redirect("/");
     }
