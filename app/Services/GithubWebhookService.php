@@ -4,44 +4,33 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\DTO\MemberDTO;
-use App\DTO\OrganizationDTO;
-use Illuminate\Support\Collection;
+use App\Models\Organization;
+use App\Models\User;
 
 class GithubWebhookService
 {
-    public function __construct(
-        protected OrganizationService $organizationService,
-    ) {}
 
-    public function handle(Collection $data): void
+    public function createOrganization(
+        string $organizationName,
+        int $organizationId,
+        string $organizationAvatarUrl,
+    ): void
     {
-        switch ($this->getActionType($data)) {
-            case "created":
-                $organizationData = $data["installation"]["account"];
-
-                if ($organizationData["type"] === config("services.organization.type")) {
-                    $organization = OrganizationDTO::createFromArray($organizationData);
-
-                    $this->organizationService->create($organization);
-                }
-
-                break;
-            case "member_removed":
-                $organization = OrganizationDTO::createFromArray($data["organization"]);
-                $member = MemberDTO::createFromArray($data["membership"]["user"]);
-
-                $this->organizationService->removeMember(
-                    $member,
-                    $organization,
-                );
-
-                break;
-        }
+        Organization::create([
+            "name" => $organizationName,
+            "github_id" => $organizationId,
+            "avatar_url" => $organizationAvatarUrl,
+        ]);
     }
 
-    protected function getActionType(Collection $data): string
+    public function removeMember(
+        int $organizationId,
+        int $memberId
+    ): void
     {
-        return $data["action"];
+        $user = User::query()->where("github_id", $memberId)->first();
+        $organization = Organization::query()->where("github_id", $organizationId)->first();
+
+        $user->organizations()->detach($organization->id);
     }
 }
