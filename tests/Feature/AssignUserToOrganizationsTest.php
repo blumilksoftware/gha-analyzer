@@ -54,7 +54,7 @@ class AssignUserToOrganizationsTest extends TestCase
         ]);
     }
 
-    public function testAssignFunctionWithNullResponse(): void
+    public function testAa(): void
     {
         $user = User::factory()->create();
 
