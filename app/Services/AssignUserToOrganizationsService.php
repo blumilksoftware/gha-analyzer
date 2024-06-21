@@ -23,8 +23,6 @@ class AssignUserToOrganizationsService
                 $organization = Organization::query()->where("github_id", $data["id"])->first();
                 $user->organizations()->syncWithoutDetaching($organization->id);
             }
-        } else {
-            return;
         }
     }
 }
