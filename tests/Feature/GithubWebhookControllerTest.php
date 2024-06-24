@@ -14,6 +14,9 @@ class GithubWebhookControllerTest extends TestCase
 {
     protected function tearDown(): void
     {
+        if ($container = \Mockery::getContainer()) {
+            $this->addToAssertionCount($container->mockery_getExpectationCount());
+        }
         Mockery::close();
         parent::tearDown();
     }
@@ -40,8 +43,6 @@ class GithubWebhookControllerTest extends TestCase
             ->with("test", 123, "http://example.com/avatar.png");
 
         $controller($request);
-
-        $this->assertTrue(true);
     }
 
     public function testInvokeWithIncorrectType(): void
@@ -64,8 +65,6 @@ class GithubWebhookControllerTest extends TestCase
         $webhookService->shouldNotReceive("createOrganization");
 
         $controller($request);
-
-        $this->assertTrue(true);
     }
 
     public function testInvokeWithMemberRemovedAction(): void
@@ -91,6 +90,13 @@ class GithubWebhookControllerTest extends TestCase
 
         $controller($request);
 
-        $this->assertTrue(true);
+    }
+
+    public function testCreateRequest(){
+
+    }
+
+    public function testRemoveMemberRequest(){
+        
     }
 }

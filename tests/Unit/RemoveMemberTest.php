@@ -14,24 +14,31 @@ class RemoveMemberTest extends TestCase
 {
     use RefreshDatabase;
 
+    private $user;
+    private $organization;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::factory()->create(["github_id" => 123]);
+        $this->organization = Organization::factory()->create(["github_id" => 456]);
+        $this->user->organizations()->attach($this->organization->id);
+    }
+
     public function testRemoveMember(): void
     {
-        $user = User::factory()->create(["github_id" => 123]);
-        $organization = Organization::factory()->create(["github_id" => 456]);
-
-        $user->organizations()->attach($organization->id);
-
         $this->assertDatabaseHas("user_organization", [
-            "organization_id" => $organization->id,
-            "user_id" => $user->id,
+            "organization_id" => $this->organization->id,
+            "user_id" => $this->user->id,
         ]);
 
         $service = new GithubWebhookService();
-        $service->removeMember($organization->github_id, $user->github_id);
+        $service->removeMember($this->organization->github_id, $this->user->github_id);
 
         $this->assertDatabaseMissing("user_organization", [
-            "organization_id" => $organization->id,
-            "user_id" => $user->id,
+            "organization_id" => $this->organization->id,
+            "user_id" => $this->user->id,
         ]);
     }
 }
