@@ -4,7 +4,7 @@ import moment from 'moment';
 import { computed } from 'vue';
 import { useLogsStore } from '@/Stores/logsStore';
 
-const {logsSample} = useLogsStore()
+const {logs} = useLogsStore()
 
 const colors = [
         'bg-gray-400',
@@ -86,7 +86,7 @@ function pricePerAuthor (author) {
     return tables.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
 }
 
-const logs = computed(() => {
+const sortedLogs = computed(() => {
   let data = tables.logs.items
 
   if (tables.logs.sort) {
@@ -122,7 +122,7 @@ const totalPrice = computed(() => {
   return tables.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
 })
 
-const data = Papa.parse(logsSample)
+const data = Papa.parse(logs)
 console.log(data)
 const headings = data.data[0]
 const parsedData = data.data

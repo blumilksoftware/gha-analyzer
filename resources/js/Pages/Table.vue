@@ -4,7 +4,7 @@ import moment from 'moment';
 import { computed, ref } from 'vue';
 import { useLogsStore } from '@/Stores/logsStore';
 
-const {logsSample} = useLogsStore()
+const {logs} = useLogsStore()
 
 const colors = [
         'bg-gray-400',
@@ -85,7 +85,7 @@ function getUnitLogo (unit) {
     return './icons/units/' + unit.toLowerCase() + '.png'
 }
 
-const logs = computed(() => {
+const sortedLogs = computed(() => {
   let data = tables.value.logs.items
 
   if (tables.value.logs.sort) {
@@ -117,7 +117,7 @@ const totalPrice = computed(() => {
   return tables.value.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
 })
 
-const data = Papa.parse(logsSample)
+const data = Papa.parse(logs)
 console.log(data)
 const headings = data.data[0]
 const parsedData = data.data
@@ -141,7 +141,7 @@ tables.value.logs.items = parsed
             </tr>
         </thead>
         <tbody>
-            <tr v-for="log in logs">
+            <tr v-for="log in sortedLogs">
                 <td class="border p-2">
                     {{ log.date }}
                     <div class="text-gray-500 text-xs">

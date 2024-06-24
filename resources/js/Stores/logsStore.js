@@ -19,9 +19,19 @@ const sample = `Date,Product,SKU,Quantity,Unit Type,Price Per Unit ($),Multiplie
 
 export const useLogsStore = defineStore('logs', ()=>{
 
-    const logsSample = ref(sample)
+    const logs = ref(sample)
+
+    function clearLogs() {
+        logs.value = ''
+    }
+
+    function setLogs(newLogs) {
+        logs.value = newLogs
+    }
 
     return {
-        logsSample
+        logs,
+        clearLogs,
+        setLogs
     }
 })
