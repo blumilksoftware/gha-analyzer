@@ -43,9 +43,13 @@ const onFileChange = (event) => {
 
 <template>
     <Navbar/>
-    <main>
-        <slot></slot>
-        <div class="container mt-6 mb-12 mx-auto">
+    <main class="container my-4 mx-auto bg-white rounded-xl p-4 shadow flex">
+        <div class="flex-1 p-4">
+            <slot></slot>
+        </div>
+        
+    </main>
+    <div class="container mt-6 mb-12 mx-auto">
             <div class="block uppercase text-white font-semibold text-xs tracking-widest">
                 <nav class="flex items-center justify-end space-x-4">
                     <span @click="clear" class="cursor-pointer px-8 py-4 rounded-md bg-blue-400 bg-opacity-50 hover:bg-opacity-25">Clear Data</span>
@@ -57,7 +61,6 @@ const onFileChange = (event) => {
                 </nav>
             </div>
         </div>
-    </main>
     <footer>
         <div class="w-full flex items-center justify-center text-white">
             <span class="mr-2 font-semibold text-xs tracking-widest">developed by</span>
