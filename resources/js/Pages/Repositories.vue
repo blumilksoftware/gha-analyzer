@@ -138,22 +138,7 @@ tables.logs.items = parsed
 
 </script>
 <template>
-<!-- 
-    <table>
-        <th>
-            <thead v-for="heading in headings">
-                {{heading}}
-            </thead>
-        </th>
-        <tbody>
-            <tr v-for="(item, index) in logs">
-                {{ item }}
-            </tr>
-        </tbody>
-    </table
-    -->
-    
-    <table class="w-full border-collapse border table-fixed mt-4 text-sm">
+   <table class="w-full border-collapse border table-fixed mt-4 text-sm">
         <thead>
             <tr class="text-left">
                 <th class="w-1/2 border p-2">Repository</th>
