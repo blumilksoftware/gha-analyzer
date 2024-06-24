@@ -1,7 +1,7 @@
 <script setup>
 import Papa from 'papaparse'
 import moment from 'moment';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const sample = `Date,Product,SKU,Quantity,Unit Type,Price Per Unit ($),Multiplier,Owner,Repository Slug,Username,Actions Workflow,Notes
 2022-05-20,Actions,Compute - UBUNTU,2,minute,0.008,1.0,galaxy,trantor,octocat,.github/workflows/check-pr.yml,
@@ -30,17 +30,18 @@ const colors = [
         'bg-pink-400',
       ] 
 
-var tables = {
+var tables = ref({
         logs: {
             items: [],
             sort: 'date',
             order: 'asc'
         }      
-    }
-var dictionaries = {
+    })
+
+var dictionaries = ref({
     authors: {},
     repositories: {},
-}
+})
 
 function parseLineToLog (line) {
     const repository = {
@@ -50,11 +51,11 @@ function parseLineToLog (line) {
         color: colors[repositories.length % colors.length]
     }
 
-    if (!dictionaries.repositories[repository.name]) {
-        dictionaries.repositories[repository.name] = repository
-        dictionaries.repositories = JSON.parse(JSON.stringify(dictionaries.repositories))
+    if (!dictionaries.value.repositories[repository.name]) {
+        dictionaries.value.repositories[repository.name] = repository
+        dictionaries.value.repositories = JSON.parse(JSON.stringify(dictionaries.value.repositories))
     } else {
-        repository.color = dictionaries.repositories[repository.name].color
+        repository.color = dictionaries.value.repositories[repository.name].color
     }
 
     let author = line[9]
@@ -62,9 +63,9 @@ function parseLineToLog (line) {
         author = 'dependabot'
     }
 
-    if (dictionaries.authors[author]) {
-        dictionaries.authors[author] = author
-        dictionaries.authors = JSON.parse(JSON.stringify(sdictionaries.authors))
+    if (dictionaries.value.authors[author]) {
+        dictionaries.value.authors[author] = author
+        dictionaries.value.authors = JSON.parse(JSON.stringify(sdictionaries.value.authors))
     }
 
     return {
@@ -84,13 +85,13 @@ function parseLineToLog (line) {
 }
 
 function filterLogsBy (tag) {
-    if (this.tables.logs.sort === tag) {
-        this.tables.logs.order = this.tables.logs.order === 'desc' ? 'asc' : 'desc'
+    if (tables.value.logs.sort === tag) {
+        tables.value.logs.order = tables.value.logs.order === 'desc' ? 'asc' : 'desc'
         return
     }
 
-    this.tables.logs.sort = tag
-    this.tables.logs.order = 'desc'
+    tables.value.logs.sort = tag
+    tables.value.logs.order = 'desc'
 }
 
 function getUnitLogo (unit) {
@@ -98,19 +99,19 @@ function getUnitLogo (unit) {
 }
 
 const logs = computed(() => {
-  let data = tables.logs.items
+  let data = tables.value.logs.items
 
-  if (tables.logs.sort) {
+  if (tables.value.logs.sort) {
     data = data.sort((a, b) => {
-      if (!isNaN(a[tables.logs.sort]) && !isNaN(b[tables.logs.sort])) {
-        return a[tables.logs.sort] > b[tables.logs.sort] ? 1 : -1
+      if (!isNaN(a[tables.value.logs.sort]) && !isNaN(b[tables.value.logs.sort])) {
+        return a[tables.value.logs.sort] > b[tables.value.logs.sort] ? 1 : -1
       }
 
-      return b[tables.logs.sort] > a[tables.logs.sort] ? 1 : -1
+      return b[tables.value.logs.sort] > a[tables.value.logs.sort] ? 1 : -1
     })
   }
 
-  if (tables.logs.order === 'desc') {
+  if (tables.value.logs.order === 'desc') {
     data = data.reverse()
   }
 
@@ -118,15 +119,15 @@ const logs = computed(() => {
 })
 
 const repositories = computed(() => {
-  return Object.values(dictionaries.repositories).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+  return Object.values(dictionaries.value.repositories).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
 })
 
 const totalQuantity = computed(() => {
-  return tables.logs.items.reduce((a, b) => a + parseInt(b.quantity), 0)
+  return tables.value.logs.items.reduce((a, b) => a + parseInt(b.quantity), 0)
 })
 
 const totalPrice = computed(() => {
-  return tables.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
+  return tables.value.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
 })
 
 const data = Papa.parse(sample)
@@ -136,7 +137,7 @@ const parsedData = data.data
 
 var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
 console.log(parsed)
-tables.logs.items = parsed
+tables.value.logs.items = parsed
 
 </script>
 <template>
