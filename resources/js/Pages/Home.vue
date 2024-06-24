@@ -1,7 +1,8 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
+import { useLogsStore } from '../Stores/logsStore'
 
-var logs = []
+const {logsSample} = useLogsStore()
 
 </script>
 <style>
@@ -11,6 +12,7 @@ var logs = []
 </style>
 
 <template>
+    <h1>{{ logsSample }}</h1>
     <Head>
         <title>GitHub Action simple analyzer</title>
     </Head>
