@@ -26,11 +26,13 @@ class GithubWebhookService
         int $memberId,
     ): void {
         $user = User::query()->where("github_id", $memberId)->first();
+
         if (!$user) {
             throw new \InvalidArgumentException("User with GitHub ID {$memberId} not found.");
         }
 
         $organization = Organization::query()->where("github_id", $organizationId)->first();
+
         if (!$organization) {
             throw new \InvalidArgumentException("Organization with GitHub ID {$organizationId} not found.");
         }

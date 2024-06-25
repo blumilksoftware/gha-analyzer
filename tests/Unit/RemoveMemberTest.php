@@ -17,7 +17,7 @@ class RemoveMemberTest extends TestCase
     private $user;
     private $organization;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
