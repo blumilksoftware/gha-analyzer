@@ -1,5 +1,14 @@
 <script setup>
 import {Link} from '@inertiajs/vue3'
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage()
+
+function getNavigationClass (tab) {
+    if (tab === page.url) {
+        return 'bg-blue-500'
+    }
+}
 </script>
 
 <template>
@@ -9,11 +18,11 @@ import {Link} from '@inertiajs/vue3'
                 <span class="pr-6 py-2 font-medium text-sm rounded-md">
                     <img src="icon.png" alt="Logo" class="w-12">
                 </span>
-                <Link href="/"><span class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50 bg-blue-500" href="/table">Raw Log</span></Link>
+                <Link href="/" ><span :class="getNavigationClass('/')" class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50 bg-blue-400 hover:bg-opacity-75" href="/table">Raw Log</span></Link>
                 <div class="flex space-x-4">
-                    <Link href="/table"><span class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50 bg-blue-500" href="/table">Table</span></Link>
-                    <Link href="/repositories"><span class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50 bg-blue-500" href="/table">Repositories</span></Link>
-                    <Link href="/authors"><span class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50 bg-blue-500" href="/table">Authors</span></Link>
+                    <Link href="/table" ><span :class="getNavigationClass('/table')" class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50 bg-blue-400 hover:bg-opacity-75" href="/table">Table</span></Link>
+                    <Link href="/repositories" ><span :class="getNavigationClass('/repositories')" class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50 bg-blue-400 hover:bg-opacity-75" href="/table">Repositories</span></Link>
+                    <Link href="/authors" ><span :class="getNavigationClass('/authors')" class="cursor-pointer px-8 py-4 text-xs rounded-md bg-opacity-50 bg-blue-400 hover:bg-opacity-75" href="/table">Authors</span></Link>
                 </div>
             </nav>
         </div>
