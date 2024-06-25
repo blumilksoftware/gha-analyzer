@@ -3,6 +3,7 @@ import Papa from 'papaparse'
 import moment from 'moment';
 import { computed, ref, watch } from 'vue';
 import { useLogsStore } from '@/Stores/logsStore';
+import { Head } from '@inertiajs/vue3';
 
 const logsStore = useLogsStore();
 const logs = computed(() => logsStore.getLogs);
@@ -136,6 +137,9 @@ function parseLogs(){
 
 </script>
 <template>
+    <Head>
+        <title>Table</title>
+    </Head>
     <table v-if="sortedLogs.length > 0" class="w-full border-collapse border table-auto mt-4 text-sm">
         <thead>
             <tr class="text-left">
