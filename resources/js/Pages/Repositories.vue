@@ -1,10 +1,11 @@
 <script setup>
 import Papa from 'papaparse'
 import moment from 'moment';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useLogsStore } from '@/Stores/logsStore';
 
-const {logs} = useLogsStore()
+const logsStore = useLogsStore();
+const logs = computed(() => logsStore.getLogs);
 
 const colors = [
         'bg-gray-400',
@@ -17,17 +18,17 @@ const colors = [
         'bg-pink-400',
       ] 
 
-var tables = {
+var tables = ref({
         logs: {
             items: [],
             sort: 'date',
             order: 'asc'
         }      
-    }
-var dictionaries = {
+    })
+var dictionaries = ref({
     authors: {},
     repositories: {},
-}
+})
 
 function parseLineToLog (line) {
     const repository = {
@@ -37,11 +38,11 @@ function parseLineToLog (line) {
         color: colors[repositories.length % colors.length]
     }
 
-    if (!dictionaries.repositories[repository.name]) {
-        dictionaries.repositories[repository.name] = repository
-        dictionaries.repositories = JSON.parse(JSON.stringify(dictionaries.repositories))
+    if (!dictionaries.value.repositories[repository.name]) {
+        dictionaries.value.repositories[repository.name] = repository
+        dictionaries.value.repositories = JSON.parse(JSON.stringify(dictionaries.value.repositories))
     } else {
-        repository.color = dictionaries.repositories[repository.name].color
+        repository.color = dictionaries.value.repositories[repository.name].color
     }
 
     let author = line[9]
@@ -49,9 +50,9 @@ function parseLineToLog (line) {
         author = 'dependabot'
     }
 
-    if (dictionaries.authors[author]) {
-        dictionaries.authors[author] = author
-        dictionaries.authors = JSON.parse(JSON.stringify(sdictionaries.authors))
+    if (dictionaries.value.authors[author]) {
+        dictionaries.value.authors[author] = author
+        dictionaries.value.authors = JSON.parse(JSON.stringify(sdictionaries.value.authors))
     }
 
     return {
@@ -71,40 +72,40 @@ function parseLineToLog (line) {
 }
 
 function filterLogsBy (tag) {
-    if (this.tables.logs.sort === tag) {
-        this.tables.logs.order = this.tables.logs.order === 'desc' ? 'asc' : 'desc'
+    if (tables.value.logs.sort === tag) {
+        tables.value.logs.order = tables.value.logs.order === 'desc' ? 'asc' : 'desc'
         return
     }
 
-    this.tables.logs.sort = tag
-    this.tables.logs.order = 'desc'
+    tables.value.logs.sort = tag
+    tables.value.logs.order = 'desc'
 }
 function quantityPerAuthor (author) {
-    return tables.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseInt(b.quantity), 0)
+    return tables.value.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseInt(b.quantity), 0)
 }
 function pricePerAuthor (author) {
-    return tables.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
+    return tables.value.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
 }
 function quantityPerRepository (repository) {
-    return tables.logs.items.filter(log => log.repository.name === repository.name).reduce((a, b) => a + parseInt(b.quantity), 0)
+    return tables.value.logs.items.filter(log => log.repository.name === repository.name).reduce((a, b) => a + parseInt(b.quantity), 0)
 }
 function pricePerRepository (repository) {
-    return tables.logs.items.filter(log => log.repository.name === repository.name).reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
+    return tables.value.logs.items.filter(log => log.repository.name === repository.name).reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
 }
 const sortedLogs = computed(() => {
-  let data = tables.logs.items
+  let data = tables.value.logs.items
 
-  if (tables.logs.sort) {
+  if (tables.value.logs.sort) {
     data = data.sort((a, b) => {
-      if (!isNaN(a[tables.logs.sort]) && !isNaN(b[tables.logs.sort])) {
-        return a[tables.logs.sort] > b[tables.logs.sort] ? 1 : -1
+      if (!isNaN(a[tables.value.logs.sort]) && !isNaN(b[tables.value.logs.sort])) {
+        return a[tables.value.logs.sort] > b[tables.value.logs.sort] ? 1 : -1
       }
 
-      return b[tables.logs.sort] > a[tables.logs.sort] ? 1 : -1
+      return b[tables.value.logs.sort] > a[tables.value.logs.sort] ? 1 : -1
     })
   }
 
-  if (tables.logs.order === 'desc') {
+  if (tables.value.logs.order === 'desc') {
     data = data.reverse()
   }
 
@@ -112,29 +113,36 @@ const sortedLogs = computed(() => {
 })
 
 const repositories = computed(() => {
-  return Object.values(dictionaries.repositories).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+  return Object.values(dictionaries.value.repositories).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
 })
 
 const authors = computed(() => {
-  return Object.values(dictionaries.authors).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1)
+  return Object.values(dictionaries.value.authors).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1)
 })
 
 const totalQuantity = computed(() => {
-  return tables.logs.items.reduce((a, b) => a + parseInt(b.quantity), 0)
+  return tables.value.logs.items.reduce((a, b) => a + parseInt(b.quantity), 0)
 })
 
 const totalPrice = computed(() => {
-  return tables.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
+  return tables.value.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
 })
 
-const data = Papa.parse(logs)
-console.log(data)
-const headings = data.data[0]
-const parsedData = data.data
+parseLogs()
 
-var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
-console.log(parsed)
-tables.logs.items = parsed
+watch (logs, () => {
+    parseLogs()
+}) 
+
+function parseLogs(){
+    const data = Papa.parse(logs.value)
+    console.log(data)
+    const parsedData = data.data
+
+    var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
+    console.log(parsed)
+    tables.value.logs.items = parsed 
+}
 
 </script>
 <template>

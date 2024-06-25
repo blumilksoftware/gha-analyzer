@@ -6,7 +6,6 @@ import { useLogsStore } from '@/Stores/logsStore';
 
 const logsStore = useLogsStore();
 const logs = computed(() => logsStore.getLogs);
-console.log(typeof logs)
 
 const colors = [
         'bg-gray-400',
