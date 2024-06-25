@@ -17,6 +17,30 @@ class GithubWebhookControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $webhookService;
+    protected $webhookController;
+    protected $organization;
+    protected $user;
+    protected $organizationName;
+    protected $organizationId;
+    protected $organizationAvatarUrl;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->webhookService = Mockery::mock(GithubWebhookService::class);
+        $this->webhookController = new GithubWebhookController($this->webhookService);
+
+        $this->user = User::factory()->create(["github_id" => 123]);
+        $this->organization = Organization::factory()->create(["github_id" => 456]);
+        $this->user->organizations()->attach($this->organization->id);
+
+        $this->organizationName = "test";
+        $this->organizationId = 123;
+        $this->organizationAvatarUrl = "http://example.com/avatar.png";
+    }
+
     protected function tearDown(): void
     {
         if ($container = Mockery::getContainer()) {
@@ -28,9 +52,6 @@ class GithubWebhookControllerTest extends TestCase
 
     public function testInvokeWithCreatedAction(): void
     {
-        $webhookService = Mockery::mock(GithubWebhookService::class);
-        $controller = new GithubWebhookController($webhookService);
-
         $request = Request::create("/webhook", "POST", [
             "action" => "created",
             "installation" => [
@@ -43,18 +64,15 @@ class GithubWebhookControllerTest extends TestCase
             ],
         ]);
 
-        $webhookService->shouldReceive("createOrganization")
+        $this->webhookService->shouldReceive("createOrganization")
             ->once()
             ->with("test", 123, "http://example.com/avatar.png");
 
-        $controller($request);
+        $this->webhookController->__invoke($request);
     }
 
     public function testInvokeWithIncorrectType(): void
     {
-        $webhookService = Mockery::mock(GithubWebhookService::class);
-        $controller = new GithubWebhookController($webhookService);
-
         $request = Request::create("/webhook", "POST", [
             "action" => "created",
             "installation" => [
@@ -67,16 +85,13 @@ class GithubWebhookControllerTest extends TestCase
             ],
         ]);
 
-        $webhookService->shouldNotReceive("createOrganization");
+        $this->webhookService->shouldNotReceive("createOrganization");
 
-        $controller($request);
+        $this->webhookController->__invoke($request);
     }
 
     public function testInvokeWithMemberRemovedAction(): void
     {
-        $webhookService = Mockery::mock(GithubWebhookService::class);
-        $controller = new GithubWebhookController($webhookService);
-
         $request = Request::create("/webhook", "POST", [
             "action" => "member_removed",
             "organization" => [
@@ -89,27 +104,23 @@ class GithubWebhookControllerTest extends TestCase
             ],
         ]);
 
-        $webhookService->shouldReceive("removeMember")
+        $this->webhookService->shouldReceive("removeMember")
             ->once()
             ->with(123, 456);
 
-        $controller($request);
+        $this->webhookController->__invoke($request);
     }
 
     public function testCreateOrganizationRequestWithSignature(): void
     {
-        $organizationName = "test";
-        $organizationId = 123;
-        $organizationAvatarUrl = "http://example.com/avatar.png";
-
         $payload = [
             "action" => "created",
             "installation" => [
                 "account" => [
                     "type" => "Organization",
-                    "login" => $organizationName,
-                    "id" => $organizationId,
-                    "avatar_url" => $organizationAvatarUrl,
+                    "login" => $this->organizationName,
+                    "id" => $this->organizationId,
+                    "avatar_url" => $this->organizationAvatarUrl,
                 ],
             ],
         ];
@@ -125,9 +136,9 @@ class GithubWebhookControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
 
         $this->assertDatabaseHas("organizations", [
-            "name" => $organizationName,
-            "github_id" => $organizationId,
-            "avatar_url" => $organizationAvatarUrl,
+            "name" => $this->organizationName,
+            "github_id" => $this->organizationId,
+            "avatar_url" => $this->organizationAvatarUrl,
         ]);
     }
 
@@ -150,18 +161,14 @@ class GithubWebhookControllerTest extends TestCase
 
     public function testCreateOrganizationRequestWithoutSignature(): void
     {
-        $organizationName = "test";
-        $organizationId = 123;
-        $organizationAvatarUrl = "http://example.com/avatar.png";
-
         $payload = [
             "action" => "created",
             "installation" => [
                 "account" => [
                     "type" => "Organization",
-                    "login" => $organizationName,
-                    "id" => $organizationId,
-                    "avatar_url" => $organizationAvatarUrl,
+                    "login" => $this->organizationName,
+                    "id" => $this->organizationId,
+                    "avatar_url" => $this->organizationAvatarUrl,
                 ],
             ],
         ];
@@ -178,10 +185,6 @@ class GithubWebhookControllerTest extends TestCase
 
     public function testRemoveMemberRequest(): void
     {
-        $user = User::factory()->create(["github_id" => 123]);
-        $organization = Organization::factory()->create(["github_id" => 456]);
-        $user->organizations()->attach($organization->id);
-
         $payload = [
             "action" => "member_removed",
             "organization" => [
@@ -201,8 +204,8 @@ class GithubWebhookControllerTest extends TestCase
         ];
 
         $this->assertDatabaseHas("user_organization", [
-            "organization_id" => $organization->id,
-            "user_id" => $user->id,
+            "organization_id" => $this->organization->id,
+            "user_id" => $this->user->id,
         ]);
 
         $response = $this->withHeaders($headers)->postJson("/api/webhook", $payload);
@@ -210,17 +213,13 @@ class GithubWebhookControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
 
         $this->assertDatabaseMissing("user_organization", [
-            "organization_id" => $organization->id,
-            "user_id" => $user->id,
+            "organization_id" => $this->organization->id,
+            "user_id" => $this->user->id,
         ]);
     }
 
     public function testRemoveMemberRequestWithWrongUser(): void
     {
-        $user = User::factory()->create(["github_id" => 123]);
-        $organization = Organization::factory()->create(["github_id" => 456]);
-        $user->organizations()->attach($organization->id);
-
         $payload = [
             "action" => "member_removed",
             "organization" => [
@@ -240,8 +239,8 @@ class GithubWebhookControllerTest extends TestCase
         ];
 
         $this->assertDatabaseHas("user_organization", [
-            "organization_id" => $organization->id,
-            "user_id" => $user->id,
+            "organization_id" => $this->organization->id,
+            "user_id" => $this->user->id,
         ]);
 
         $response = $this->withHeaders($headers)->postJson("/api/webhook", $payload);
@@ -251,10 +250,6 @@ class GithubWebhookControllerTest extends TestCase
 
     public function testRemoveMemberRequestWithWrongOrganization(): void
     {
-        $user = User::factory()->create(["github_id" => 123]);
-        $organization = Organization::factory()->create(["github_id" => 456]);
-        $user->organizations()->attach($organization->id);
-
         $payload = [
             "action" => "member_removed",
             "organization" => [
@@ -274,8 +269,8 @@ class GithubWebhookControllerTest extends TestCase
         ];
 
         $this->assertDatabaseHas("user_organization", [
-            "organization_id" => $organization->id,
-            "user_id" => $user->id,
+            "organization_id" => $this->organization->id,
+            "user_id" => $this->user->id,
         ]);
 
         $response = $this->withHeaders($headers)->postJson("/api/webhook", $payload);
