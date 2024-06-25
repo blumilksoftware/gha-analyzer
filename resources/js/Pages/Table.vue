@@ -119,7 +119,6 @@ const totalPrice = computed(() => {
 
 const data = Papa.parse(logs)
 console.log(data)
-const headings = data.data[0]
 const parsedData = data.data
 
 var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
