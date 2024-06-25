@@ -132,11 +132,9 @@ watch (logs, () => {
 
 function parseLogs(){
     const data = Papa.parse(logs.value)
-    console.log(data)
     const parsedData = data.data
 
     var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
-    console.log(parsed)
     tables.value.logs.items = parsed 
 }
 

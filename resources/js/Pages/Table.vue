@@ -1,5 +1,5 @@
 <script setup>
-import Papa from 'papaparse'
+import Papa from 'papaparse';
 import moment from 'moment';
 import { computed, ref, watch } from 'vue';
 import { useLogsStore } from '@/Stores/logsStore';
@@ -9,52 +9,52 @@ const logsStore = useLogsStore();
 const logs = computed(() => logsStore.getLogs);
 
 const colors = [
-        'bg-gray-400',
-        'bg-blue-400',
-        'bg-red-400',
-        'bg-green-400',
-        'bg-yellow-400',
-        'bg-indigo-400',
-        'bg-purple-400',
-        'bg-pink-400',
-      ] 
+    'bg-gray-400',
+    'bg-blue-400',
+    'bg-red-400',
+    'bg-green-400',
+    'bg-yellow-400',
+    'bg-indigo-400',
+    'bg-purple-400',
+    'bg-pink-400',
+];
 
-var tables = ref({
-        logs: {
-            items: [],
-            sort: 'date',
-            order: 'asc'
-        }      
-    })
+const tables = ref({
+    logs: {
+        items: [],
+        sort: 'date',
+        order: 'asc',
+    },
+});
 
-var dictionaries = ref({
+const dictionaries = ref({
     authors: {},
     repositories: {},
-})
+});
 
-function parseLineToLog (line) {
+function parseLineToLog(line) {
     const repository = {
         slug: line[7] + '/' + line[8],
         name: line[8],
         namespace: line[7] ? line[7] : 'unknown',
-        color: colors[repositories.length % colors.length]
-    }
+        color: colors[Object.keys(dictionaries.value.repositories).length % colors.length],
+    };
 
     if (!dictionaries.value.repositories[repository.name]) {
-        dictionaries.value.repositories[repository.name] = repository
-        dictionaries.value.repositories = JSON.parse(JSON.stringify(dictionaries.value.repositories))
+        dictionaries.value.repositories[repository.name] = repository;
+        dictionaries.value.repositories = JSON.parse(JSON.stringify(dictionaries.value.repositories));
     } else {
-        repository.color = dictionaries.value.repositories[repository.name].color
+        repository.color = dictionaries.value.repositories[repository.name].color;
     }
 
-    let author = line[9]
+    let author = line[9];
     if (author === 'dependabot[bot]') {
-        author = 'dependabot'
+        author = 'dependabot';
     }
 
-    if (dictionaries.value.authors[author]) {
-        dictionaries.value.authors[author] = author
-        dictionaries.value.authors = JSON.parse(JSON.stringify(sdictionaries.value.authors))
+    if (!dictionaries.value.authors[author]) {
+        dictionaries.value.authors[author] = author;
+        dictionaries.value.authors = JSON.parse(JSON.stringify(dictionaries.value.authors));
     }
 
     return {
@@ -70,72 +70,67 @@ function parseLineToLog (line) {
         author: author,
         workflow: line[10],
         notes: line[11],
-    }
+    };
 }
 
-function filterLogsBy (tag) {
+function filterLogsBy(tag) {
     if (tables.value.logs.sort === tag) {
-        tables.value.logs.order = tables.value.logs.order === 'desc' ? 'asc' : 'desc'
-        return
+        tables.value.logs.order = tables.value.logs.order === 'desc' ? 'asc' : 'desc';
+    } else {
+        tables.value.logs.sort = tag;
+        tables.value.logs.order = 'desc';
     }
-
-    tables.value.logs.sort = tag
-    tables.value.logs.order = 'desc'
 }
 
-function getUnitLogo (unit) {
-    return './icons/units/' + unit.toLowerCase() + '.png'
+function getUnitLogo(unit) {
+    return './icons/units/' + unit.toLowerCase() + '.png';
 }
 
 const sortedLogs = computed(() => {
-  let data = tables.value.logs.items
+    let data = [...tables.value.logs.items];
 
-  if (tables.value.logs.sort) {
-    data = data.sort((a, b) => {
-      if (!isNaN(a[tables.value.logs.sort]) && !isNaN(b[tables.value.logs.sort])) {
-        return a[tables.value.logs.sort] > b[tables.value.logs.sort] ? 1 : -1
-      }
+    if (tables.value.logs.sort) {
+        data = data.sort((a, b) => {
+            if (typeof a[tables.value.logs.sort] === 'number' && typeof b[tables.value.logs.sort] === 'number') {
+                return a[tables.value.logs.sort] - b[tables.value.logs.sort];
+            }
+            return a[tables.value.logs.sort] > b[tables.value.logs.sort] ? 1 : -1;
+        });
+    }
 
-      return b[tables.value.logs.sort] > a[tables.value.logs.sort] ? 1 : -1
-    })
-  }
+    if (tables.value.logs.order === 'desc') {
+        data = data.reverse();
+    }
 
-  if (tables.value.logs.order === 'desc') {
-    data = data.reverse()
-  }
-
-  return data
-})
+    return data;
+});
 
 const repositories = computed(() => {
-  return Object.values(dictionaries.value.repositories).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
-})
+    return Object.values(dictionaries.value.repositories).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1);
+});
 
 const totalQuantity = computed(() => {
-  return tables.value.logs.items.reduce((a, b) => a + parseInt(b.quantity), 0)
-})
+    return tables.value.logs.items.reduce((a, b) => a + parseInt(b.quantity), 0);
+});
 
 const totalPrice = computed(() => {
-  return tables.value.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
-})
+    return tables.value.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3);
+});
 
-parseLogs()
+function parseLogs() {
+    const data = Papa.parse(logs.value, { header: false });
+    const parsedData = data.data;
 
-watch (logs, () => {
-    parseLogs()
-}) 
-
-function parseLogs(){
-    const data = Papa.parse(logs.value)
-    console.log(data)
-    const parsedData = data.data
-
-    var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
-    console.log(parsed)
-    tables.value.logs.items = parsed 
+    const parsed = parsedData.slice(1, -1).map((line) => parseLineToLog(line));
+    tables.value.logs.items = parsed;
 }
 
+watch(logs, () => {
+    parseLogs();
+}, { immediate: true });
+
 </script>
+
 <template>
     <Head>
         <title>Table</title>
@@ -206,5 +201,5 @@ function parseLogs(){
             </tr>
         </tbody>
     </table>
-    <h1 v-else >No logs loaded</h1>
+    <h1 v-else>No logs loaded</h1>
 </template>
