@@ -146,7 +146,7 @@ function parseLogs(){
 
 </script>
 <template>
-   <table class="w-full border-collapse border table-fixed mt-4 text-sm">
+   <table v-if="sortedLogs.length > 0" class="w-full border-collapse border table-fixed mt-4 text-sm">
         <thead>
             <tr class="text-left">
                 <th class="w-1/2 border p-2">Repository</th>
@@ -176,5 +176,5 @@ function parseLogs(){
             </tr>
         </tbody>
     </table>
-    
+    <h1 v-else>No logs loaded</h1>
 </template>

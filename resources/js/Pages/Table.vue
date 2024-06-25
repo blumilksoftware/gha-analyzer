@@ -136,7 +136,7 @@ function parseLogs(){
 
 </script>
 <template>
-    <table class="w-full border-collapse border table-auto mt-4 text-sm">
+    <table v-if="sortedLogs.length > 0" class="w-full border-collapse border table-auto mt-4 text-sm">
         <thead>
             <tr class="text-left">
                 <th class="border p-2 cursor-pointer" @click="filterLogsBy('date')">Date</th>
@@ -202,4 +202,5 @@ function parseLogs(){
             </tr>
         </tbody>
     </table>
+    <h1 v-else >No logs loaded</h1>
 </template>
