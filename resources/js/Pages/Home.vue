@@ -1,10 +1,10 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import { useLogsStore } from '../Stores/logsStore'
-import { ref } from 'vue';
+import { computed } from 'vue';
 
-const {logs} = useLogsStore()
-const aaa = ref(logs.value)
+const logsStore = useLogsStore();
+const logs = computed(() => logsStore.getLogs);
 
 </script>
 <style>
