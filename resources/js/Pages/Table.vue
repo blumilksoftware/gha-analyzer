@@ -1,10 +1,12 @@
 <script setup>
 import Papa from 'papaparse'
 import moment from 'moment';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useLogsStore } from '@/Stores/logsStore';
 
-const {logs} = useLogsStore()
+const logsStore = useLogsStore();
+const logs = computed(() => logsStore.getLogs);
+console.log(typeof logs)
 
 const colors = [
         'bg-gray-400',
@@ -117,13 +119,21 @@ const totalPrice = computed(() => {
   return tables.value.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
 })
 
-const data = Papa.parse(logs)
-console.log(data)
-const parsedData = data.data
+parseLogs()
 
-var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
-console.log(parsed)
-tables.value.logs.items = parsed
+watch (logs, () => {
+    parseLogs()
+}) 
+
+function parseLogs(){
+    const data = Papa.parse(logs.value)
+    console.log(data)
+    const parsedData = data.data
+
+    var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
+    console.log(parsed)
+    tables.value.logs.items = parsed 
+}
 
 </script>
 <template>
