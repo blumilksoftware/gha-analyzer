@@ -9,7 +9,7 @@ export const useLogsStore = defineStore('logs', {
         getLogs: (state) => state.logs,
       },
       actions: {
-        setLogs(newLogs) {
+        setLogs(newLogs: string) {
             this.logs = newLogs;
         },
         clearLogs() {
