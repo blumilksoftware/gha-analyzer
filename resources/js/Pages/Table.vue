@@ -154,7 +154,7 @@ watch(logs, () => {
             </tr>
         </thead>
         <tbody>
-            <tr v-for="log in logsWithIcons" :key="log.slug">
+            <tr v-for="log in logsWithIcons" >
                 <td class="border p-2">
                     {{ log.date }}
                     <div class="text-gray-500 text-xs">
