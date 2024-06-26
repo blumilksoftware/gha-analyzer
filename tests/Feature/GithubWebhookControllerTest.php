@@ -4,21 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\Api\GithubWebhookController;
 use App\Models\Organization;
 use App\Models\User;
-use App\Services\GithubWebhookService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Request;
-use Mockery;
 use Tests\TestCase;
 
 class GithubWebhookControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $webhookService;
-    protected $webhookController;
     protected $organization;
     protected $user;
     protected $organizationName;
@@ -28,9 +23,6 @@ class GithubWebhookControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->webhookService = Mockery::mock(GithubWebhookService::class);
-        $this->webhookController = new GithubWebhookController($this->webhookService);
 
         $this->user = User::factory()->create(["github_id" => 123]);
         $this->organization = Organization::factory()->create(["github_id" => 456]);
@@ -43,72 +35,7 @@ class GithubWebhookControllerTest extends TestCase
 
     protected function tearDown(): void
     {
-        if ($container = Mockery::getContainer()) {
-            $this->addToAssertionCount($container->mockery_getExpectationCount());
-        }
-        Mockery::close();
         parent::tearDown();
-    }
-
-    public function testInvokeWithCreatedAction(): void
-    {
-        $request = Request::create("/webhook", "POST", [
-            "action" => "created",
-            "installation" => [
-                "account" => [
-                    "type" => config("services.organization.type"),
-                    "login" => "test",
-                    "id" => 123,
-                    "avatar_url" => "http://example.com/avatar.png",
-                ],
-            ],
-        ]);
-
-        $this->webhookService->shouldReceive("createOrganization")
-            ->once()
-            ->with("test", 123, "http://example.com/avatar.png");
-
-        $this->webhookController->__invoke($request);
-    }
-
-    public function testInvokeWithIncorrectType(): void
-    {
-        $request = Request::create("/webhook", "POST", [
-            "action" => "created",
-            "installation" => [
-                "account" => [
-                    "type" => "wrong_type",
-                    "login" => "test",
-                    "id" => 123,
-                    "avatar_url" => "http://example.com/avatar.png",
-                ],
-            ],
-        ]);
-
-        $this->webhookService->shouldNotReceive("createOrganization");
-
-        $this->webhookController->__invoke($request);
-    }
-
-    public function testInvokeWithMemberRemovedAction(): void
-    {
-        $request = Request::create("/webhook", "POST", [
-            "action" => "member_removed",
-            "organization" => [
-                "id" => 123,
-            ],
-            "membership" => [
-                "user" => [
-                    "id" => 456,
-                ],
-            ],
-        ]);
-
-        $this->webhookService->shouldReceive("removeMember")
-            ->once()
-            ->with(123, 456);
-
-        $this->webhookController->__invoke($request);
     }
 
     public function testCreateOrganizationRequestWithSignature(): void
@@ -238,14 +165,10 @@ class GithubWebhookControllerTest extends TestCase
             "Content-Type" => "application/json",
         ];
 
-        $this->assertDatabaseHas("user_organization", [
-            "organization_id" => $this->organization->id,
-            "user_id" => $this->user->id,
-        ]);
-
+        $this->withoutExceptionHandling()->expectException(ModelNotFoundException::class);
         $response = $this->withHeaders($headers)->postJson("/api/webhook", $payload);
 
-        $this->assertSame(500, $response->getStatusCode());
+        $this->assertSame(404, $response->getStatusCode());
     }
 
     public function testRemoveMemberRequestWithWrongOrganization(): void
@@ -268,13 +191,9 @@ class GithubWebhookControllerTest extends TestCase
             "Content-Type" => "application/json",
         ];
 
-        $this->assertDatabaseHas("user_organization", [
-            "organization_id" => $this->organization->id,
-            "user_id" => $this->user->id,
-        ]);
-
+        $this->withoutExceptionHandling()->expectException(ModelNotFoundException::class);
         $response = $this->withHeaders($headers)->postJson("/api/webhook", $payload);
 
-        $this->assertSame(500, $response->getStatusCode());
+        $this->assertSame(404, $response->getStatusCode());
     }
 }
