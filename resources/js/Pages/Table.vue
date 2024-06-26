@@ -83,7 +83,7 @@ function filterLogsBy(tag) {
 }
 
 function getUnitLogo(unit) {
-    return './icons/units/' + unit.toLowerCase() + '.png';
+    return new URL(`../../assets/images/units/${unit}.png`, import.meta.url).href;
 }
 
 const sortedLogs = computed(() => {
@@ -103,6 +103,13 @@ const sortedLogs = computed(() => {
     }
 
     return data;
+});
+
+const logsWithIcons = computed(() => {
+    return sortedLogs.value.map(log => ({
+        ...log,
+        unitLogo: getUnitLogo(log.unit)
+    }));
 });
 
 const repositories = computed(() => {
@@ -130,12 +137,11 @@ watch(logs, () => {
 }, { immediate: true });
 
 </script>
-
 <template>
     <Head>
         <title>Table</title>
     </Head>
-    <table v-if="sortedLogs.length > 0" class="w-full border-collapse border table-auto mt-4 text-sm">
+    <table v-if="logsWithIcons.length > 0" class="w-full border-collapse border table-auto mt-4 text-sm">
         <thead>
             <tr class="text-left">
                 <th class="border p-2 cursor-pointer" @click="filterLogsBy('date')">Date</th>
@@ -148,7 +154,7 @@ watch(logs, () => {
             </tr>
         </thead>
         <tbody>
-            <tr v-for="log in sortedLogs">
+            <tr v-for="log in logsWithIcons" :key="log.slug">
                 <td class="border p-2">
                     {{ log.date }}
                     <div class="text-gray-500 text-xs">
@@ -174,7 +180,7 @@ watch(logs, () => {
                     ${{ log.total }}
                 </td>
                 <td class="border p-2">
-                    <img :src="getUnitLogo(log.unit)" :alt="log.unit" :title="log.unit" class="w-8">
+                    <img :src="log.unitLogo" :alt="log.unit" :title="log.unit" class="w-8">
                 </td>
                 <td class="border p-2">
                     <a :href="'https://github.com/' + log.author" class="flex items-center" target="_blank" v-if="log.author">
