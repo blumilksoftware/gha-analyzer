@@ -7,12 +7,6 @@ const logsStore = useLogsStore();
 const logs = computed(() => logsStore.getLogs);
 
 </script>
-<style>
-    .title{
-        color: red
-    }
-</style>
-
 <template>
     <Head>
         <title>GitHub Action simple analyzer</title>

@@ -72,15 +72,6 @@ function parseLineToLog (line) {
     }
 }
 
-function filterLogsBy (tag) {
-    if (tables.value.logs.sort === tag) {
-        tables.value.logs.order = tables.value.logs.order === 'desc' ? 'asc' : 'desc'
-        return
-    }
-
-    tables.value.logs.sort = tag
-    tables.value.logs.order = 'desc'
-}
 function quantityPerAuthor (author) {
     return tables.value.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseInt(b.quantity), 0)
 }

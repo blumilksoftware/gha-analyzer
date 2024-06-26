@@ -72,21 +72,6 @@ function parseLineToLog (line) {
     }
 }
 
-function filterLogsBy (tag) {
-    if (tables.value.logs.sort === tag) {
-        tables.value.logs.order = tables.value.logs.order === 'desc' ? 'asc' : 'desc'
-        return
-    }
-
-    tables.value.logs.sort = tag
-    tables.value.logs.order = 'desc'
-}
-function quantityPerAuthor (author) {
-    return tables.value.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseInt(b.quantity), 0)
-}
-function pricePerAuthor (author) {
-    return tables.value.logs.items.filter(log => log.author === author).reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
-}
 function quantityPerRepository (repository) {
     return tables.value.logs.items.filter(log => log.repository.name === repository.name).reduce((a, b) => a + parseInt(b.quantity), 0)
 }
@@ -115,10 +100,6 @@ const sortedLogs = computed(() => {
 
 const repositories = computed(() => {
   return Object.values(dictionaries.value.repositories).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
-})
-
-const authors = computed(() => {
-  return Object.values(dictionaries.value.authors).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1)
 })
 
 const totalQuantity = computed(() => {
