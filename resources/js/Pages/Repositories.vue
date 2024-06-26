@@ -36,7 +36,7 @@ function parseLineToLog (line) {
         slug: line[7] + '/' + line[8],
         name: line[8],
         namespace: line[7] ? line[7] : 'unknown',
-        color: colors[repositories.length % colors.length]
+        color: colors[repositories.value.length % colors.length]
     }
 
     if (!dictionaries.value.repositories[repository.name]) {
