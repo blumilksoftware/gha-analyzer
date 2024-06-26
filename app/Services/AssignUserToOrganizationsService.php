@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Http\Integrations\GithubConnector;
+use App\Http\Integrations\Requests\GetUsersOrganizationsRequest;
 use App\Models\Organization;
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
 
 class AssignUserToOrganizationsService
 {
-    public function assign(): void
-    {
-        $user = User::query()->where("id", auth()->user()->id)->first();
+    public function __construct(
+        protected GithubConnector $githubConnector,
+    ) {}
 
-        $response = Http::withHeaders([
-            "Authorization" => "Bearer " . $user->github_token,
-        ])->get("https://api.github.com/user/orgs");
+    public function assign(User $user): void
+    {
+        $request = new GetUsersOrganizationsRequest($user);
+
+        $response = $this->githubConnector->send($request);
 
         if ($response->json() !== null) {
             foreach ($response->json() as $data) {

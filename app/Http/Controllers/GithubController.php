@@ -36,7 +36,7 @@ class GithubController extends Controller
 
         Auth::login($user);
 
-        $this->assignUserService->assign();
+        $this->assignUserService->assign($user);
 
         return redirect("/");
     }

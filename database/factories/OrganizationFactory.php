@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class OrganizationFactory extends Factory
 {
     public function definition(): array
     {
         return [
-            "name" => fake()->name(),
-            "github_id" => rand(),
-            "avatar_url" => Str::random(10),
+            "name" => $this->faker->unique()->word(),
+            "github_id" => $this->faker->unique()->randomNumber(),
+            "avatar_url" => $this->faker->url(),
         ];
     }
 }
