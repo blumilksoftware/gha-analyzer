@@ -4,20 +4,15 @@ import moment from 'moment'
 import { computed, ref, watch } from 'vue'
 import { useLogsStore } from '@/Stores/logsStore'
 import { Head } from '@inertiajs/vue3'
+import resolveConfig from 'tailwindcss/resolveConfig'
+import tailwindConfig from '../../../tailwind.config.js'
+
+const fullConfig = resolveConfig(tailwindConfig)
+
+const colors = fullConfig.theme.colors
 
 const logsStore = useLogsStore()
 const logs = computed(() => logsStore.getLogs)
-
-const colors = [
-  'bg-gray-400',
-  'bg-blue-400',
-  'bg-red-400',
-  'bg-green-400',
-  'bg-yellow-400',
-  'bg-indigo-400',
-  'bg-purple-400',
-  'bg-pink-400',
-] 
 
 var tables = ref({
   logs: {
