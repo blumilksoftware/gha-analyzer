@@ -12,12 +12,12 @@ const sampleDataURL = '../../data/sampleData.json'
 
 async function fetchData(data) {
   try {
-    const response = await fetch(new URL(data, import.meta.url).href);
-    const jsonData = await response.json();
+    const response = await fetch(new URL(data, import.meta.url).href)
+    const jsonData = await response.json()
     return jsonData
     
   } catch (error) {
-    console.error('Error loading data:', error);
+    console.error('Error loading data:', error)
   }
 }
 
