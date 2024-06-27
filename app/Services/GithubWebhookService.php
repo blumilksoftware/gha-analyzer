@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTO\MemberDTO;
+use App\DTO\OrganizationDTO;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -11,27 +13,22 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class GithubWebhookService
 {
     public function createOrganization(
-        string $organizationName,
-        int $organizationId,
-        string $organizationAvatarUrl,
+        OrganizationDTO $organizationDto
     ): void {
         Organization::create([
-            "name" => $organizationName,
-            "github_id" => $organizationId,
-            "avatar_url" => $organizationAvatarUrl,
+            "name" => $organizationDto->name,
+            "github_id" => $organizationDto->githubId,
+            "avatar_url" => $organizationDto->avatarUrl,
         ]);
     }
 
     public function removeMember(
-        int $organizationId,
-        int $memberId,
+        OrganizationDTO $organizationDto,
+        MemberDTO $memberDto
     ): void {
-        try {
-            $user = User::query()->where("github_id", $memberId)->firstOrFail();
-            $organization = Organization::query()->where("github_id", $organizationId)->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            throw $e;
-        }
+
+        $user = User::query()->where("github_id", $memberDto->githubId)->firstOrFail();
+        $organization = Organization::query()->where("github_id", $organizationDto->githubId)->firstOrFail();
 
         $user->organizations()->detach($organization->id);
     }

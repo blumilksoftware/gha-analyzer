@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\DTO\MemberDTO;
+use App\DTO\OrganizationDTO;
 use App\Models\Organization;
 use App\Models\User;
 use App\Services\GithubWebhookService;
@@ -14,8 +16,10 @@ class RemoveMemberTest extends TestCase
 {
     use RefreshDatabase;
 
-    private $user;
-    private $organization;
+    private User $user;
+    private Organization $organization;
+    private MemberDTO $memberDto;
+    private OrganizationDTO $organizationDto;
 
     protected function setUp(): void
     {
@@ -24,6 +28,9 @@ class RemoveMemberTest extends TestCase
         $this->user = User::factory()->create(["github_id" => 123]);
         $this->organization = Organization::factory()->create(["github_id" => 456]);
         $this->user->organizations()->attach($this->organization->id);
+
+        $this->memberDto = new MemberDTO(123);
+        $this->organizationDto = new OrganizationDTO("test", 456, "http://example.com/avatar.png");
     }
 
     public function testRemoveMember(): void
@@ -34,7 +41,7 @@ class RemoveMemberTest extends TestCase
         ]);
 
         $service = new GithubWebhookService();
-        $service->removeMember($this->organization->github_id, $this->user->github_id);
+        $service->removeMember($this->organizationDto, $this->memberDto);
 
         $this->assertDatabaseMissing("user_organization", [
             "organization_id" => $this->organization->id,

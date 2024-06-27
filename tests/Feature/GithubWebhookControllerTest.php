@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\DTO\OrganizationDTO;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,11 +15,9 @@ class GithubWebhookControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $organization;
-    protected $user;
-    protected $organizationName;
-    protected $organizationId;
-    protected $organizationAvatarUrl;
+    protected Organization $organization;
+    protected User $user;
+    protected OrganizationDTO $organizationDto;
 
     protected function setUp(): void
     {
@@ -28,9 +27,7 @@ class GithubWebhookControllerTest extends TestCase
         $this->organization = Organization::factory()->create(["github_id" => 456]);
         $this->user->organizations()->attach($this->organization->id);
 
-        $this->organizationName = "test";
-        $this->organizationId = 123;
-        $this->organizationAvatarUrl = "http://example.com/avatar.png";
+        $this->organizationDto = new OrganizationDTO("test", 123, "http://example.com/avatar.png");
     }
 
     protected function tearDown(): void
@@ -45,9 +42,9 @@ class GithubWebhookControllerTest extends TestCase
             "installation" => [
                 "account" => [
                     "type" => "Organization",
-                    "login" => $this->organizationName,
-                    "id" => $this->organizationId,
-                    "avatar_url" => $this->organizationAvatarUrl,
+                    "login" => $this->organizationDto->name,
+                    "id" => $this->organizationDto->githubId,
+                    "avatar_url" => $this->organizationDto->avatarUrl,
                 ],
             ],
         ];
@@ -63,9 +60,9 @@ class GithubWebhookControllerTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
 
         $this->assertDatabaseHas("organizations", [
-            "name" => $this->organizationName,
-            "github_id" => $this->organizationId,
-            "avatar_url" => $this->organizationAvatarUrl,
+            "name" => $this->organizationDto->name,
+            "github_id" => $this->organizationDto->githubId,
+            "avatar_url" => $this->organizationDto->avatarUrl,
         ]);
     }
 
@@ -93,9 +90,9 @@ class GithubWebhookControllerTest extends TestCase
             "installation" => [
                 "account" => [
                     "type" => "Organization",
-                    "login" => $this->organizationName,
-                    "id" => $this->organizationId,
-                    "avatar_url" => $this->organizationAvatarUrl,
+                    "login" => $this->organizationDto->name,
+                    "id" => $this->organizationDto->githubId,
+                    "avatar_url" => $this->organizationDto->avatarUrl,
                 ],
             ],
         ];
@@ -115,7 +112,9 @@ class GithubWebhookControllerTest extends TestCase
         $payload = [
             "action" => "member_removed",
             "organization" => [
+                "login" => "test",
                 "id" => 456,
+                "avatar_url" => "http://example.com/avatar.png"
             ],
             "membership" => [
                 "user" => [
@@ -150,7 +149,9 @@ class GithubWebhookControllerTest extends TestCase
         $payload = [
             "action" => "member_removed",
             "organization" => [
+                "login" => "test",
                 "id" => 456,
+                "avatar_url" => "http://example.com/avatar.png"
             ],
             "membership" => [
                 "user" => [
@@ -176,7 +177,9 @@ class GithubWebhookControllerTest extends TestCase
         $payload = [
             "action" => "member_removed",
             "organization" => [
+                "login" => "test",
                 "id" => 789,
+                "avatar_url" => "http://example.com/avatar.png"
             ],
             "membership" => [
                 "user" => [
