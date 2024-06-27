@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\DTO\MemberDTO;
 use App\DTO\OrganizationDTO;
 use App\Http\Controllers\Controller;
 use App\Services\GithubWebhookService;
 use Illuminate\Http\Request;
-use App\DTO\MemberDTO;
 
 class GithubWebhookController extends Controller
 {
@@ -23,10 +23,11 @@ class GithubWebhookController extends Controller
         switch ($actionType) {
             case "created":
                 $account = $request->get("installation")["account"];
+
                 if ($account["type"] === config("services.organization.type")) {
                     $this->webhookService->createOrganization
                     (
-                        OrganizationDTO::createFromArray($account)
+                        OrganizationDTO::createFromArray($account),
                     );
                 }
 
@@ -35,7 +36,7 @@ class GithubWebhookController extends Controller
                 $this->webhookService->removeMember
                 (
                     OrganizationDTO::createFromArray($request->get("organization")),
-                    MemberDTO::createFromArray($request->get("membership")["user"])
+                    MemberDTO::createFromArray($request->get("membership")["user"]),
                 );
 
                 break;

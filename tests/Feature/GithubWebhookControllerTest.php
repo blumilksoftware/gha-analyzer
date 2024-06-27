@@ -114,7 +114,7 @@ class GithubWebhookControllerTest extends TestCase
             "organization" => [
                 "login" => "test",
                 "id" => 456,
-                "avatar_url" => "http://example.com/avatar.png"
+                "avatar_url" => "http://example.com/avatar.png",
             ],
             "membership" => [
                 "user" => [
@@ -151,7 +151,7 @@ class GithubWebhookControllerTest extends TestCase
             "organization" => [
                 "login" => "test",
                 "id" => 456,
-                "avatar_url" => "http://example.com/avatar.png"
+                "avatar_url" => "http://example.com/avatar.png",
             ],
             "membership" => [
                 "user" => [
@@ -179,7 +179,7 @@ class GithubWebhookControllerTest extends TestCase
             "organization" => [
                 "login" => "test",
                 "id" => 789,
-                "avatar_url" => "http://example.com/avatar.png"
+                "avatar_url" => "http://example.com/avatar.png",
             ],
             "membership" => [
                 "user" => [
