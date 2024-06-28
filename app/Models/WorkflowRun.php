@@ -16,7 +16,7 @@ class WorkflowRun extends Model
         "github_id",
         "name",
         "repository_id",
-        "created_at"
+        "created_at",
     ];
 
     public function workflowJobs(): HasMany

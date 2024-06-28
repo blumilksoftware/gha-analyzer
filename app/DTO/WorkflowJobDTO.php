@@ -14,6 +14,6 @@ class WorkflowJobDTO
         public int $workflowRunId,
         public int $minutes,
         public int $multiplier,
-        public float $pricePerUnit
+        public float $pricePerUnit,
     ) {}
 }

@@ -16,7 +16,7 @@ class Repository extends Model
         "github_id",
         "name",
         "organization_id",
-        "is_private"
+        "is_private",
     ];
 
     public function workflowRuns(): HasMany

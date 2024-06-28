@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Organization;
-use App\Models\Repository;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class RepositoryFactory extends Factory
@@ -16,7 +15,7 @@ class RepositoryFactory extends Factory
             "github_id" => $this->faker->unique()->randomNumber(),
             "name" => $this->faker->word(),
             "organization_id" => Organization::factory(),
-            "is_private" => $this->faker->boolean()
+            "is_private" => $this->faker->boolean(),
         ];
     }
 }
