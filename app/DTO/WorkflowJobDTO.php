@@ -9,8 +9,8 @@ class WorkflowJobDTO
     public function __construct(
         public int $githubId,
         public string $name,
-        public string $runner_os,
-        public string $runner_type,
+        public string $runnerOs,
+        public string $runnerType,
         public int $workflowRunId,
         public int $minutes,
         public int $multiplier,
