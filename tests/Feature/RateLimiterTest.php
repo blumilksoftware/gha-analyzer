@@ -13,7 +13,18 @@ use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Saloon\Http\Request;
 use Saloon\RateLimitPlugin\Exceptions\RateLimitReachedException;
+use Saloon\RateLimitPlugin\Limit;
 use Tests\TestCase;
+
+class GithubConnectorTestVersion extends GithubConnector
+{
+    protected function resolveLimits(): array
+    {
+        return [
+            Limit::allow(0)->everyHour(),
+        ];
+    }
+}
 
 class RateLimiterTest extends TestCase
 {
@@ -63,13 +74,13 @@ class RateLimiterTest extends TestCase
             $this->requestUrl => MockResponse::make(body: "", status: 200),
         ]);
 
-        $this->githubConnector->withMockClient($mockClient);
+        $githubConnector = new GithubConnectorTestVersion();
+
+        $githubConnector->withMockClient($mockClient);
 
         $this->expectException(RateLimitReachedException::class);
 
-        for ($i = 0; $i = 5000; $i++) {
-            $this->githubConnector->send($this->request);
-        }
+        $githubConnector->send($this->request);
     }
 
     public function testResponse403(): void
