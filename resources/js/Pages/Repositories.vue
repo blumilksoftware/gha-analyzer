@@ -12,7 +12,6 @@ async function fetchColors() {
     const data = await response.json();
     return data.colors;
 }
-console.log(colors.value)
 
 const logsStore = useLogsStore()
 const logs = computed(() => logsStore.getLogs)
@@ -36,7 +35,6 @@ function parseLineToLog (line) {
     namespace: line[7] ? line[7] : 'unknown',
     color: colors.value[repositories.value.length % colors.value.length],
   }
-  console.log(colors.value)
 
   if (!dictionaries.value.repositories[repository.name]) {
     dictionaries.value.repositories[repository.name] = repository
@@ -120,7 +118,6 @@ async function parseLogs(){
   const parsedData = data.data
 
   colors.value = await fetchColors()
-  console.log(colors.value)
 
   var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
   tables.value.logs.items = parsed 

@@ -8,11 +8,11 @@ const {clearLogs, setLogs} = useLogsStore()
 const files = ref([])
 const fileInput = ref(null)
 
-const sampleDataURL = '../../data/sampleData.json'
+const sampleDataURL = '/api/data/sampleLogs'
 
 async function fetchData(data) {
   try {
-    const response = await fetch(new URL(data, import.meta.url).href)
+    const response = await fetch(sampleDataURL)
     const jsonData = await response.json()
     return jsonData
     
