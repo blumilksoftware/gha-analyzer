@@ -10,7 +10,7 @@ const fileInput = ref(null)
 
 const sampleDataURL = '/api/data/sampleLogs'
 
-async function fetchData(data) {
+async function fetchData() {
   try {
     const response = await fetch(sampleDataURL)
     const jsonData = await response.json()

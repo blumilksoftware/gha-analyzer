@@ -11,5 +11,5 @@ use Illuminate\Support\Facades\Route;
 Route::post("/webhook", GithubWebhookController::class)
     ->middleware(ValidateGithubWebhook::class);
 
-Route::get("/data/colors", [ColorsController::class, 'getData']);
-Route::get("/data/sampleLogs", [LogsController::class, 'getSampleLogs']);
+Route::get("/data/colors", [ColorsController::class, "getData"]);
+Route::get("/data/sampleLogs", [LogsController::class, "getSampleLogs"]);

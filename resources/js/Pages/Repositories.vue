@@ -8,9 +8,9 @@ import { Head } from '@inertiajs/vue3'
 const colors = ref([])
 
 async function fetchColors() {
-    const response = await fetch('api/data/colors');
-    const data = await response.json();
-    return data.colors;
+  const response = await fetch('api/data/colors')
+  const data = await response.json()
+  return data.colors
 }
 
 const logsStore = useLogsStore()
@@ -50,7 +50,7 @@ function parseLineToLog (line) {
 
   if (dictionaries.value.authors[author]) {
     dictionaries.value.authors[author] = author
-    dictionaries.value.authors = JSON.parse(JSON.stringify(sdictionaries.value.authors))
+    dictionaries.value.authors = JSON.parse(JSON.stringify(dictionaries.value.authors))
   }
 
   return {
