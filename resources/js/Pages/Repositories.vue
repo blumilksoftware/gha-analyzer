@@ -4,12 +4,15 @@ import moment from 'moment'
 import { computed, ref, watch } from 'vue'
 import { useLogsStore } from '@/Stores/logsStore'
 import { Head } from '@inertiajs/vue3'
-import resolveConfig from 'tailwindcss/resolveConfig'
-import tailwindConfig from '../../../tailwind.config.js'
 
-const fullConfig = resolveConfig(tailwindConfig)
+const colors = ref([])
 
-const colors = fullConfig.theme.colors
+async function fetchColors() {
+    const response = await fetch('api/data/colors');
+    const data = await response.json();
+    return data.colors;
+}
+console.log(colors.value)
 
 const logsStore = useLogsStore()
 const logs = computed(() => logsStore.getLogs)
@@ -31,8 +34,9 @@ function parseLineToLog (line) {
     slug: line[7] + '/' + line[8],
     name: line[8],
     namespace: line[7] ? line[7] : 'unknown',
-    color: colors[repositories.value.length % colors.length],
+    color: colors.value[repositories.value.length % colors.value.length],
   }
+  console.log(colors.value)
 
   if (!dictionaries.value.repositories[repository.name]) {
     dictionaries.value.repositories[repository.name] = repository
@@ -111,9 +115,12 @@ watch (logs, () => {
   parseLogs()
 }) 
 
-function parseLogs(){
+async function parseLogs(){
   const data = Papa.parse(logs.value)
   const parsedData = data.data
+
+  colors.value = await fetchColors()
+  console.log(colors.value)
 
   var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
   tables.value.logs.items = parsed 
