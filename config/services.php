@@ -26,4 +26,5 @@ return [
     "organization" => [
         "type" => "Organization",
     ],
+    "rate_limit" => 5000,
 ];
