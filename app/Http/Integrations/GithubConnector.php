@@ -35,7 +35,7 @@ class GithubConnector extends Connector
     protected function resolveLimits(): array
     {
         return [
-            Limit::allow(5000)->everyHour(),
+            Limit::allow(config("services.rate_limit"))->everyHour(),
         ];
     }
 

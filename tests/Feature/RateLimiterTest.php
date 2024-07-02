@@ -7,24 +7,14 @@ namespace Tests\Feature;
 use App\Http\Integrations\GithubConnector;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-use Saloon\Config;
+use Illuminate\Support\Facades\Config;
+use Saloon\Config as SaloonConfig;
 use Saloon\Enums\Method;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Saloon\Http\Request;
 use Saloon\RateLimitPlugin\Exceptions\RateLimitReachedException;
-use Saloon\RateLimitPlugin\Limit;
 use Tests\TestCase;
-
-class GithubConnectorTestVersion extends GithubConnector
-{
-    protected function resolveLimits(): array
-    {
-        return [
-            Limit::allow(0)->everyHour(),
-        ];
-    }
-}
 
 class RateLimiterTest extends TestCase
 {
@@ -37,7 +27,7 @@ class RateLimiterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Config::preventStrayRequests();
+        SaloonConfig::preventStrayRequests();
         Cache::clear();
 
         $this->requestUrl = "https://api.github.com/test";
@@ -70,17 +60,17 @@ class RateLimiterTest extends TestCase
 
     public function testRateLimitReached(): void
     {
+        Config::set("services.rate_limit", 0);
+
         $mockClient = new MockClient([
             $this->requestUrl => MockResponse::make(body: "", status: 200),
         ]);
 
-        $githubConnector = new GithubConnectorTestVersion();
-
-        $githubConnector->withMockClient($mockClient);
+        $this->githubConnector->withMockClient($mockClient);
 
         $this->expectException(RateLimitReachedException::class);
 
-        $githubConnector->send($this->request);
+        $this->githubConnector->send($this->request);
     }
 
     public function testResponse403(): void
