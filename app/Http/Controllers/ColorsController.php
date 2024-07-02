@@ -10,7 +10,7 @@ class ColorsController extends Controller
 {
     public function getData()
     {
-        $path = storage_path("/app/colors.json");
+        $path = storage_path("../resources/data/colors.json");
         $data = json_decode(File::get($path), true);
 
         return response()->json($data);

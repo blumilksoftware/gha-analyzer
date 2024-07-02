@@ -10,7 +10,7 @@ class LogsController extends Controller
 {
     public function getSampleLogs()
     {
-        $path = storage_path("/app/sampleLogs.json");
+        $path = storage_path("../resources/data/sampleLogs.json");
         $data = json_decode(File::get($path), true);
 
         return response()->json($data);
