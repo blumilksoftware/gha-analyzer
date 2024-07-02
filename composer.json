@@ -12,7 +12,8 @@
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.14",
-        "laravel/tinker": "^2.9"
+        "laravel/tinker": "^2.9",
+        "saloonphp/saloon": "^3.0"
     },
     "require-dev": {
         "blumilksoftware/codestyle": "^v3.0.0",
