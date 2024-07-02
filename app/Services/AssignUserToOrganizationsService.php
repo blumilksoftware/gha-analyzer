@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Http\Integrations\GithubConnector;
+use App\Http\Integrations\Requests\GetMembershipRequest;
 use App\Http\Integrations\Requests\GetUsersOrganizationsRequest;
 use App\Models\Organization;
 use App\Models\User;
@@ -24,8 +25,26 @@ class AssignUserToOrganizationsService
         if ($response->json() !== null) {
             foreach ($response->json() as $data) {
                 $organization = Organization::query()->where("github_id", $data["id"])->first();
-                $user->organizations()->syncWithoutDetaching($organization->id);
+
+                if ($this->getRole($user, $organization->name) === "admin") {
+                    $user->organizations()->syncWithoutDetaching([
+                        $organization->id => ["is_admin" => true],
+                    ]);
+                } else {
+                    $user->organizations()->syncWithoutDetaching($organization->id);
+                }
             }
         }
+    }
+
+    public function getRole(User $user, string $organizationName): string
+    {
+        $request = new GetMembershipRequest($user, $organizationName);
+
+        $response = $this->githubConnector->send($request);
+
+        $data = $response->json();
+
+        return $data["role"];
     }
 }

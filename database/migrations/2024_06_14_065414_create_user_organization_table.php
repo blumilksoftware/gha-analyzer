@@ -13,6 +13,7 @@ return new class() extends Migration {
             $table->id();
             $table->bigInteger("user_id");
             $table->bigInteger("organization_id");
+            $table->boolean("is_admin")->default(false);
             $table->foreign("user_id")->references("id")->on("users")->onDelete("cascade");
             $table->foreign("organization_id")->references("id")->on("organizations")->onDelete("cascade");
         });

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Http\Integrations\GithubConnector;
+use App\Http\Integrations\Requests\GetMembershipRequest;
+use App\Http\Integrations\Requests\GetUsersOrganizationsRequest;
 use App\Models\Organization;
 use App\Models\User;
 use App\Services\AssignUserToOrganizationsService;
@@ -31,7 +33,6 @@ class AssignUserToOrganizationsTest extends TestCase
         Config::preventStrayRequests();
 
         $this->githubConnector = new GithubConnector();
-        $this->requestUrl = "https://api.github.com/user/orgs";
         $this->user = User::factory()->create();
         $this->assignUserService = new AssignUserToOrganizationsService($this->githubConnector);
 
@@ -43,7 +44,8 @@ class AssignUserToOrganizationsTest extends TestCase
         $this->actingAs($this->user);
 
         $mockClient = new MockClient([
-            $this->requestUrl => MockResponse::make([["id" => 123, "login" => "org1"]], 200),
+            GetUsersOrganizationsRequest::class => MockResponse::make([["id" => 123, "login" => "org1"]], 200),
+            GetMembershipRequest::class => MockResponse::make(["role" => "member"], 200),
         ]);
 
         $this->githubConnector->withMockClient($mockClient);
@@ -55,6 +57,29 @@ class AssignUserToOrganizationsTest extends TestCase
         $this->assertDatabaseHas("user_organization", [
             "user_id" => $this->user->id,
             "organization_id" => $organization->id,
+            "is_admin" => false,
+        ]);
+    }
+
+    public function testAssignFunctionWithValidResponseAndAdminRole(): void
+    {
+        $this->actingAs($this->user);
+
+        $mockClient = new MockClient([
+            GetUsersOrganizationsRequest::class => MockResponse::make([["id" => 123, "login" => "org1"]], 200),
+            GetMembershipRequest::class => MockResponse::make(["role" => "admin"], 200),
+        ]);
+
+        $this->githubConnector->withMockClient($mockClient);
+
+        $organization = Organization::factory()->create(["github_id" => 123]);
+
+        $this->assignUserService->assign($this->user);
+
+        $this->assertDatabaseHas("user_organization", [
+            "user_id" => $this->user->id,
+            "organization_id" => $organization->id,
+            "is_admin" => true,
         ]);
     }
 
@@ -63,7 +88,7 @@ class AssignUserToOrganizationsTest extends TestCase
         $this->actingAs($this->user);
 
         $mockClient = new MockClient([
-            $this->requestUrl => MockResponse::make([], 200),
+            GetUsersOrganizationsRequest::class => MockResponse::make([], 200),
         ]);
 
         $this->githubConnector->withMockClient($mockClient);
@@ -80,7 +105,7 @@ class AssignUserToOrganizationsTest extends TestCase
         $this->actingAs($this->user);
 
         $mockClient = new MockClient([
-            $this->requestUrl => MockResponse::make([], 500),
+            GetUsersOrganizationsRequest::class => MockResponse::make([], 500),
         ]);
 
         $this->githubConnector->withMockClient($mockClient);
@@ -95,7 +120,7 @@ class AssignUserToOrganizationsTest extends TestCase
         $this->actingAs($this->user);
 
         $mockClient = new MockClient([
-            $this->requestUrl => MockResponse::make([], 404),
+            GetUsersOrganizationsRequest::class => MockResponse::make([], 404),
         ]);
 
         $this->githubConnector->withMockClient($mockClient);
