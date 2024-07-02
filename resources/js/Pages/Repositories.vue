@@ -10,7 +10,9 @@ const colors = ref([])
 async function fetchColors() {
   const response = await fetch('api/data/colors')
   const data = await response.json()
-  return data.colors
+  return new Promise((resolve, reject) => {
+    resolve((data))
+  })
 }
 
 const logsStore = useLogsStore()
@@ -117,10 +119,14 @@ async function parseLogs(){
   const data = Papa.parse(logs.value)
   const parsedData = data.data
 
-  colors.value = await fetchColors()
+  fetchColors().then((response)=>{
+    colors.value = response
+    console.log(colors.value)
 
-  var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
-  tables.value.logs.items = parsed 
+    var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
+    tables.value.logs.items = parsed 
+  })
+
 }
 
 </script>
