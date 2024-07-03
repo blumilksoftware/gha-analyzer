@@ -4,12 +4,14 @@ import moment from 'moment'
 import { computed, ref, watch } from 'vue'
 import { useLogsStore } from '@/Stores/logsStore'
 import { Head } from '@inertiajs/vue3'
-import resolveConfig from 'tailwindcss/resolveConfig'
-import tailwindConfig from '../../../tailwind.config.js'
 
-const fullConfig = resolveConfig(tailwindConfig)
-
-const colors = fullConfig.theme.colors
+const props = defineProps({
+  colors: {
+    type: Array,
+    default: () => [],
+  },
+})
+var colors = props.colors
 
 const logsStore = useLogsStore()
 const logs = computed(() => logsStore.getLogs)
