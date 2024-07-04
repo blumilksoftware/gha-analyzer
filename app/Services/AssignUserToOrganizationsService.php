@@ -18,9 +18,7 @@ class AssignUserToOrganizationsService
 
     public function assign(User $user): void
     {
-        $request = new GetUsersOrganizationsRequest($user);
-
-        $response = $this->githubConnector->send($request);
+        $response = $this->githubConnector->send(new GetUsersOrganizationsRequest($user));
 
         if ($response->json() !== null) {
             foreach ($response->json() as $data) {
@@ -39,9 +37,7 @@ class AssignUserToOrganizationsService
 
     public function getRole(User $user, string $organizationName): string
     {
-        $request = new GetMembershipRequest($user, $organizationName);
-
-        $response = $this->githubConnector->send($request);
+        $response = $this->githubConnector->send(new GetMembershipRequest($user, $organizationName));
 
         $data = $response->json();
 
