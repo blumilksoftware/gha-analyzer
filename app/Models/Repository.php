@@ -13,6 +13,7 @@ class Repository extends Model
     use HasFactory;
 
     public $timestamps = false;
+
     protected $fillable = [
         "github_id",
         "name",
