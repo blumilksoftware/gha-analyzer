@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\AuthorsController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\RepositoriesController;
+use App\Http\Controllers\OrganizationsController;
 use App\Http\Controllers\TableController;
 use Illuminate\Support\Facades\Route;
 
