@@ -6,13 +6,14 @@ namespace App\Http\Controllers;
 
 use App\Services\ColorsService;
 use Inertia\Inertia;
+use App\Models\Repository;
 
 class RepositoriesController extends Controller
 {
     protected array $colors;
 
     public function __construct(
-        protected ColorsService $colorsService,
+        protected ColorsService $colorsService
     ) {
         $this->colors = [];
     }
@@ -23,6 +24,7 @@ class RepositoriesController extends Controller
 
         return Inertia::render("Repositories", [
             "colors" => $this->colors,
+            "repositoriesPROPS" => Repository::all()
         ]);
     }
 

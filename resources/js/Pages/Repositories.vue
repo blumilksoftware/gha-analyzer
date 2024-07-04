@@ -10,6 +10,9 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  repositoriesPROPS: {
+    type: Array
+  }
 })
 
 var colors = props.colors
@@ -126,6 +129,7 @@ async function parseLogs(){
   <Head>
     <title>Repositories</title>
   </Head>
+  <h1>{{ repositoriesPROPS }}</h1>
   <table v-if="sortedLogs.length > 0" class="w-full border-collapse border table-fixed mt-4 text-sm">
     <thead>
       <tr class="text-left">
