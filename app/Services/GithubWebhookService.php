@@ -6,42 +6,28 @@ namespace App\Services;
 
 use App\DTO\MemberDTO;
 use App\DTO\OrganizationDTO;
-use Illuminate\Support\Collection;
+use App\Models\Organization;
+use App\Models\User;
 
 class GithubWebhookService
 {
-    public function __construct(
-        protected OrganizationService $organizationService,
-    ) {}
-
-    public function handle(Collection $data): void
-    {
-        switch ($this->getActionType($data)) {
-            case "created":
-                $organizationData = $data["installation"]["account"];
-
-                if ($organizationData["type"] === config("services.organization.type")) {
-                    $organization = OrganizationDTO::createFromArray($organizationData);
-
-                    $this->organizationService->create($organization);
-                }
-
-                break;
-            case "member_removed":
-                $organization = OrganizationDTO::createFromArray($data["organization"]);
-                $member = MemberDTO::createFromArray($data["membership"]["user"]);
-
-                $this->organizationService->removeMember(
-                    $member,
-                    $organization,
-                );
-
-                break;
-        }
+    public function createOrganization(
+        OrganizationDTO $organizationDto,
+    ): void {
+        Organization::create([
+            "name" => $organizationDto->name,
+            "github_id" => $organizationDto->githubId,
+            "avatar_url" => $organizationDto->avatarUrl,
+        ]);
     }
 
-    protected function getActionType(Collection $data): string
-    {
-        return $data["action"];
+    public function removeMember(
+        OrganizationDTO $organizationDto,
+        MemberDTO $memberDto,
+    ): void {
+        $user = User::query()->where("github_id", $memberDto->githubId)->firstOrFail();
+        $organization = Organization::query()->where("github_id", $organizationDto->githubId)->firstOrFail();
+
+        $user->organizations()->detach($organization->id);
     }
 }
