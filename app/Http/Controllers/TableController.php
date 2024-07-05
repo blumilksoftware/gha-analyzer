@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Services\ColorsService;
 use Inertia\Inertia;
+use App\Models\WorkflowJob;
+use App\Models\WorkflowRun;
 
 class TableController extends Controller
 {
@@ -17,6 +19,8 @@ class TableController extends Controller
     {
         return Inertia::render("Table", [
             "colors" => $this->colorsService->getColors(),
+            "jobs" => WorkflowJob::all(),
+            "runs" => WorkflowRun::all(),
         ]);
     }
 }

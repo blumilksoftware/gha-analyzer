@@ -13,6 +13,12 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  jobs: {
+    type: Array,
+  },
+  runs: {
+    type: Array,
+  }
 })
 var colors = props.colors
 
@@ -135,6 +141,9 @@ watch(logs, () => {
   <Head>
     <title>Table</title>
   </Head>
+  <h1>{{ jobs }}</h1>
+  <br>
+  <h1>{{ runs }}</h1>
   <table v-if="logsWithIcons.length > 0" class="w-full border-collapse border table-auto mt-4 text-sm">
     <thead>
       <tr class="text-left">

@@ -4,12 +4,12 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Repository;
+use App\Models\WorkflowJob;
 
-class RepositoriesSeeder extends Seeder
+class WorkflowJobsSeeder extends Seeder
 {
     public function run(): void
     {
-        Repository::factory()->count(5)->create();
+        WorkflowJob::factory()->count(5)->create();
     }
 }

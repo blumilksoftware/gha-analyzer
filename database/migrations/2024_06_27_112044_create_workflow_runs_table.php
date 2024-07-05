@@ -16,6 +16,7 @@ return new class() extends Migration {
             $table->bigInteger("repository_id");
             $table->timestamp("created_at");
             $table->foreign("repository_id")->references("id")->on("repositories")->onDelete("cascade");
+            $table->timestamp("updated_at");
         });
     }
 

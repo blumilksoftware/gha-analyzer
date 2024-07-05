@@ -129,8 +129,10 @@ async function parseLogs(){
   <Head>
     <title>Repositories</title>
   </Head>
-  <h1>{{ repositoriesPROPS }}</h1>
-  <table v-if="sortedLogs.length > 0" class="w-full border-collapse border table-fixed mt-4 text-sm">
+  <h1 v-for="repository in repositoriesPROPS">
+    {{repository.name}}
+  </h1>
+  <table class="w-full border-collapse border table-fixed mt-4 text-sm">
     <thead>
       <tr class="text-left">
         <th class="w-1/2 border p-2">Repository</th>
@@ -141,7 +143,7 @@ async function parseLogs(){
       </tr>
     </thead>
     <tbody>
-      <tr v-for="repository in repositories" :key="repository">
+      <tr v-for="repository in repositoriesPROPS" :key="repository">
         <td class="border p-2">
           <div class="text-gray-500 text-xs">
             {{ repository.namespace }}
@@ -160,5 +162,4 @@ async function parseLogs(){
       </tr>
     </tbody>
   </table>
-  <h1 v-else>No logs loaded</h1>
 </template>
