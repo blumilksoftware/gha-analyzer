@@ -6,6 +6,7 @@ namespace App\Http\Integrations\Requests;
 
 use App\DTO\OrganizationDTO;
 use App\DTO\RepositoryDTO;
+use App\Models\Organization;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Saloon\Enums\Method;
@@ -27,6 +28,8 @@ class GetRepositoriesRequest extends Request
 
     public function createDtoFromResponse(Response $response): Collection
     {
+        $organization = Organization::query()->where("github_id", $this->organizationDto->githubId)->firstOrFail();
+
         $repositories = collect();
 
         if ($response->json() !== null) {
@@ -34,7 +37,7 @@ class GetRepositoriesRequest extends Request
                 $repositories->push(new RepositoryDTO(
                     githubId: $data["id"],
                     name: $data["name"],
-                    organizationId: $data["owner"]["id"],
+                    organizationId: $organization->id,
                     isPrivate: $data["private"],
                 ));
             }
