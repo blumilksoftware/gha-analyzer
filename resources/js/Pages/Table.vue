@@ -1,7 +1,7 @@
 <script setup>
 import Papa from 'papaparse'
 import moment from 'moment'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, toRefs } from 'vue'
 import { useLogsStore } from '@/Stores/logsStore'
 import { Head } from '@inertiajs/vue3'
 
@@ -13,14 +13,15 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  jobs: {
-    type: Array,
-  },
   runs: {
     type: Array,
   }
 })
 var colors = props.colors
+const { runs } = toRefs(props);
+onMounted(()=>{
+  console.log(runs.value)
+})
 
 const tables = ref({
   logs: {
@@ -141,9 +142,8 @@ watch(logs, () => {
   <Head>
     <title>Table</title>
   </Head>
-  <h1>{{ jobs }}</h1>
   <br>
-  <h1>{{ runs }}</h1>
+  <h1 v-for="run in runs">{{ run.name }}</h1>
   <table v-if="logsWithIcons.length > 0" class="w-full border-collapse border table-auto mt-4 text-sm">
     <thead>
       <tr class="text-left">
