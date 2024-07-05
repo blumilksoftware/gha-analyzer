@@ -15,7 +15,7 @@ class WorkflowRunFactory extends Factory
             "github_id" => $this->faker->unique()->randomNumber(),
             "name" => $this->faker->word(),
             "repository_id" => Repository::factory(),
-            "created_at" => $this->faker->iso8601(),
+            "github_created_at" => $this->faker->iso8601(),
         ];
     }
 }
