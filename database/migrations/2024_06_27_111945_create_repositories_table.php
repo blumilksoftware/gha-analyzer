@@ -15,6 +15,7 @@ return new class() extends Migration {
             $table->string("name");
             $table->bigInteger("organization_id");
             $table->boolean("is_private");
+            $table->timestamps();
             $table->foreign("organization_id")->references("id")->on("organizations")->onDelete("cascade");
         });
     }
