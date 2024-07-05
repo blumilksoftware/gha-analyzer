@@ -130,21 +130,6 @@ class FetchRepositoriesTest extends TestCase
         ]);
     }
 
-    public function testfetchRepositoriesWithEmptyResponse(): void
-    {
-        $this->user->organizations()->attach($this->organization->id, ["is_admin" => true]);
-
-        $mockClient = new MockClient([
-            GetRepositoriesRequest::class => MockResponse::make([], 200),
-        ]);
-
-        $this->githubConnector->withMockClient($mockClient);
-
-        $this->expectException(FetchingRepositoriesErrorException::class);
-
-        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto);
-    }
-
     public function testfetchRepositoriesWithStatus500(): void
     {
         $this->user->organizations()->attach($this->organization->id, ["is_admin" => true]);

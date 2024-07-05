@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\DTO\OrganizationDTO;
 use App\Exceptions\FetchingRepositoriesErrorException;
-use App\Exceptions\UnableToMakeDtoFromResponseException;
 use App\Http\Integrations\GithubConnector;
 use App\Http\Integrations\Requests\GetRepositoriesRequest;
 use App\Models\Organization;
@@ -62,8 +61,6 @@ class FetchRepositoriesService
                     "is_private" => $repositoryDto->isPrivate,
                 ]);
             }
-        } else {
-            throw new UnableToMakeDtoFromResponseException("Unable to make DTO from response");
         }
     }
 }
