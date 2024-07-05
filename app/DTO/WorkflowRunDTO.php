@@ -12,6 +12,6 @@ class WorkflowRunDTO
         public int $githubId,
         public string $name,
         public int $repositoryId,
-        public DateTime $created_at,
+        public DateTime $createdAt,
     ) {}
 }
