@@ -14,7 +14,8 @@ return new class() extends Migration {
             $table->bigInteger("github_id");
             $table->string("name");
             $table->bigInteger("repository_id");
-            $table->timestamp("created_at");
+            $table->timestamp("github_created_at");
+            $table->timestamps();
             $table->foreign("repository_id")->references("id")->on("repositories")->onDelete("cascade");
         });
     }

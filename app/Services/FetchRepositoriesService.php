@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTO\OrganizationDTO;
+use App\Exceptions\FetchingRepositoriesErrorException;
 use App\Exceptions\UnableToMakeDtoFromResponseException;
 use App\Http\Integrations\GithubConnector;
 use App\Http\Integrations\Requests\GetRepositoriesRequest;
@@ -12,6 +13,7 @@ use App\Models\Organization;
 use App\Models\Repository;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\UnauthorizedException;
 
@@ -26,33 +28,42 @@ class FetchRepositoriesService
         $organization = Organization::query()->where("github_id", $organizationDto->githubId)->firstOrFail();
         $user = User::query()->where("id", Auth::user()->id)->firstOrFail();
 
-        if ($user->organizations()
+        $userOrganizationExists = $user->organizations()
             ->where("organization_id", $organization->id)
             ->where("is_admin", true)
-            ->exists()) {
-            $request = new GetRepositoriesRequest($organizationDto);
+            ->exists();
 
-            $response = $this->githubConnector->send($request);
-
+        if ($userOrganizationExists) {
             try {
+                $request = new GetRepositoriesRequest($organizationDto);
+
+                $response = $this->githubConnector->send($request);
+
                 $this->storeRepositories($response->dto());
-            } catch (Exception) {
-                throw new UnableToMakeDtoFromResponseException("Unable to make DTO from response");
+            } catch (Exception $exception) {
+                throw new FetchingRepositoriesErrorException(
+                    message: "Error ocurred while fetching repositories",
+                    previous: $exception,
+                );
             }
         } else {
             throw new UnauthorizedException();
         }
     }
 
-    public function storeRepositories(array $repositories): void
+    public function storeRepositories(Collection $repositories): void
     {
-        foreach ($repositories as $repositoryDto) {
-            Repository::firstOrCreate([
-                "github_id" => $repositoryDto->githubId,
-                "name" => $repositoryDto->name,
-                "organization_id" => $repositoryDto->organizationId,
-                "is_private" => $repositoryDto->isPrivate,
-            ]);
+        if (!$repositories->isEmpty()) {
+            foreach ($repositories as $repositoryDto) {
+                Repository::firstOrCreate([
+                    "github_id" => $repositoryDto->githubId,
+                    "name" => $repositoryDto->name,
+                    "organization_id" => $repositoryDto->organizationId,
+                    "is_private" => $repositoryDto->isPrivate,
+                ]);
+            }
+        } else {
+            throw new UnableToMakeDtoFromResponseException("Unable to make DTO from response");
         }
     }
 }

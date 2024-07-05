@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\DTO\OrganizationDTO;
-use App\Exceptions\UnableToMakeDtoFromResponseException;
+use App\Exceptions\FetchingRepositoriesErrorException;
 use App\Http\Integrations\GithubConnector;
 use App\Http\Integrations\Requests\GetRepositoriesRequest;
 use App\Models\Organization;
@@ -14,8 +14,6 @@ use App\Services\FetchRepositoriesService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\UnauthorizedException;
 use Saloon\Config;
-use Saloon\Exceptions\Request\Statuses\InternalServerErrorException;
-use Saloon\Exceptions\Request\Statuses\NotFoundException;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
 use Tests\TestCase;
@@ -142,7 +140,7 @@ class FetchRepositoriesTest extends TestCase
 
         $this->githubConnector->withMockClient($mockClient);
 
-        $this->expectException(UnableToMakeDtoFromResponseException::class);
+        $this->expectException(FetchingRepositoriesErrorException::class);
 
         $this->fetchRepositoriesService->fetchRepositories($this->organizationDto);
     }
@@ -157,7 +155,7 @@ class FetchRepositoriesTest extends TestCase
 
         $this->githubConnector->withMockClient($mockClient);
 
-        $this->expectException(InternalServerErrorException::class);
+        $this->expectException(FetchingRepositoriesErrorException::class);
 
         $this->fetchRepositoriesService->fetchRepositories($this->organizationDto);
     }
@@ -172,7 +170,7 @@ class FetchRepositoriesTest extends TestCase
 
         $this->githubConnector->withMockClient($mockClient);
 
-        $this->expectException(NotFoundException::class);
+        $this->expectException(FetchingRepositoriesErrorException::class);
 
         $this->fetchRepositoriesService->fetchRepositories($this->organizationDto);
     }

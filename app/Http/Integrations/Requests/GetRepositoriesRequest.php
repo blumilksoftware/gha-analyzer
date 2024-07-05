@@ -6,6 +6,7 @@ namespace App\Http\Integrations\Requests;
 
 use App\DTO\OrganizationDTO;
 use App\DTO\RepositoryDTO;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
@@ -24,16 +25,18 @@ class GetRepositoriesRequest extends Request
         return "/orgs" . $this->organizationDto->name . "/repos";
     }
 
-    public function createDtoFromResponse(Response $response): array
+    public function createDtoFromResponse(Response $response): Collection
     {
+        $repositories = collect();
+
         if ($response->json() !== null) {
             foreach ($response->json() as $data) {
-                $repositories[] = new RepositoryDTO(
+                $repositories->push(new RepositoryDTO(
                     githubId: $data["id"],
                     name: $data["name"],
                     organizationId: $data["owner"]["id"],
                     isPrivate: $data["private"],
-                );
+                ));
             }
         }
 

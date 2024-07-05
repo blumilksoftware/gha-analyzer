@@ -19,6 +19,7 @@ return new class() extends Migration {
             $table->integer("minutes");
             $table->integer("multiplier");
             $table->float("price_per_unit");
+            $table->timestamps();
             $table->foreign("workflow_run_id")->references("id")->on("workflow_runs")->onDelete("cascade");
         });
     }
