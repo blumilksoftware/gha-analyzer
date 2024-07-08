@@ -29,6 +29,12 @@ function totalRunPrice(jobs) {
   return total
 }
 
+function toLocalDate(date){
+  var dateObj = new Date(date)
+  var formattedDate = dateObj.toLocaleDateString()
+  return formattedDate
+}
+
 </script>
 
 <template>
@@ -42,14 +48,14 @@ function totalRunPrice(jobs) {
         <th class="border p-2 cursor-pointer" @click="">Date</th>
         <th class="border p-2 cursor-pointer" @click="">Repository</th>
         <th class="border p-2 cursor-pointer" @click=""># of Jobs</th>
-        <th class="border p-2 cursor-pointer" @click="">Price</th>
+        <th class="border p-2 cursor-pointer" @click="">Run Price</th>
         <th class="border p-2">Workflow Run Name</th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="run in props.runs">
         <td class="border p-2">
-          {{ run.created_at }}
+          {{ toLocalDate(run.created_at) }}
           <div class="text-gray-500 text-xs">
             {{  }}
           </div>
