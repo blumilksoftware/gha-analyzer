@@ -12,6 +12,7 @@ use App\Models\Organization;
 use App\Models\Repository;
 use App\Models\User;
 use App\Models\WorkflowJob;
+use App\Models\WorkflowRun;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +26,12 @@ class FetchWorkflowJobsService
 
     public function fetchWorkflowJobs(WorkflowRunDTO $workflowRunDto): void
     {
+        $workflowRun = WorkflowRun::query()->where("github_id", $workflowRunDto->githubId)->firstOrFail();
+
+        if ($workflowRun->workflowJobs()->exists()) {
+            return;
+        }
+
         $repository = Repository::query()
             ->where("id", $workflowRunDto->repositoryId)
             ->firstOrFail();

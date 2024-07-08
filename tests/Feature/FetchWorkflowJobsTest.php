@@ -11,6 +11,7 @@ use App\Http\Integrations\Requests\GetWorkflowJobsRequest;
 use App\Models\Organization;
 use App\Models\Repository;
 use App\Models\User;
+use App\Models\WorkflowJob;
 use App\Models\WorkflowRun;
 use App\Services\FetchWorkflowJobsService;
 use DateTime;
@@ -54,7 +55,7 @@ class FetchWorkflowJobsTest extends TestCase
         MockClient::destroyGlobal();
     }
 
-    public function testFetchWorkflowRunsWithAdminUser(): void
+    public function testFetchWorkflowJobsWithAdminUser(): void
     {
         $this->user->organizations()->attach($this->repository->organization_id, ["is_admin" => true]);
 
@@ -90,7 +91,46 @@ class FetchWorkflowJobsTest extends TestCase
         ]);
     }
 
-    public function testFetchWorkflowRunsWithMemberUser(): void
+    public function testFetchWorkflowJobsIfAlreadyFetched(): void
+    {
+        $this->user->organizations()->attach($this->repository->organization_id, ["is_admin" => true]);
+        WorkflowJob::factory()->create([
+            "workflow_run_id" => $this->workflowRun->id,
+        ]);
+
+        $mockClient = new MockClient([
+            GetWorkflowJobsRequest::class => MockResponse::make([
+                "jobs" => [
+                    [
+                        "id" => 123,
+                        "name" => "job1",
+                        "started_at" => "2024-06-19T08:25:09Z",
+                        "completed_at" => "2024-06-19T08:26:09Z",
+                        "labels" => [
+                            "ubuntu-latest",
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $this->githubConnector->withMockClient($mockClient);
+
+        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto);
+
+        $this->assertDatabaseMissing("workflow_jobs", [
+            "github_id" => 123,
+            "name" => "job1",
+            "workflow_run_id" => $this->workflowRun->id,
+            "runner_os" => "ubuntu",
+            "runner_type" => "standard",
+            "minutes" => 1,
+            "multiplier" => 1,
+            "price_per_unit" => 0.008,
+        ]);
+    }
+
+    public function testFetchWorkflowJobsWithMemberUser(): void
     {
         $this->user->organizations()->attach($this->repository->organization_id);
 
@@ -128,7 +168,7 @@ class FetchWorkflowJobsTest extends TestCase
         ]);
     }
 
-    public function testFetchWorkflowRunsWithUserNotInOrganization(): void
+    public function testFetchWorkflowJobsWithUserNotInOrganization(): void
     {
         $mockClient = new MockClient([
             GetWorkflowJobsRequest::class => MockResponse::make([
@@ -164,7 +204,7 @@ class FetchWorkflowJobsTest extends TestCase
         ]);
     }
 
-    public function testFetchWorkflowRunsWithStatus500(): void
+    public function testFetchWorkflowJobsWithStatus500(): void
     {
         $this->user->organizations()->attach($this->repository->organization_id, ["is_admin" => true]);
 
@@ -179,7 +219,7 @@ class FetchWorkflowJobsTest extends TestCase
         $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto);
     }
 
-    public function testFetchWorkflowRunsWithStatus404(): void
+    public function testFetchWorkflowJobsWithStatus404(): void
     {
         $this->user->organizations()->attach($this->repository->organization_id, ["is_admin" => true]);
 
