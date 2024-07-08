@@ -10,3 +10,5 @@ Route::get("/", fn(): Response => inertia("Welcome"));
 
 Route::get("/auth/redirect", [GithubController::class, "redirect"]);
 Route::get("/auth/callback", [GithubController::class, "callback"]);
+
+Route::get("/{organizationId}/fetch", [GithubController::class, "fetchData"]);

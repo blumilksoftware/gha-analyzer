@@ -22,7 +22,7 @@ class FetchRepositoriesService
         protected GithubConnector $githubConnector,
     ) {}
 
-    public function fetchRepositories(OrganizationDTO $organizationDto): void
+    public function fetchRepositories(OrganizationDTO $organizationDto): Collection
     {
         $organization = Organization::query()->where("github_id", $organizationDto->githubId)->firstOrFail();
         $user = User::query()->where("id", Auth::user()->id)->firstOrFail();
@@ -39,11 +39,14 @@ class FetchRepositoriesService
                 $response = $this->githubConnector->send($request);
 
                 $this->storeRepositories($response->dto());
+
+                return $response->dto();
             } catch (Exception $exception) {
-                throw new FetchingRepositoriesErrorException(
+                throw $exception;
+                /*throw new FetchingRepositoriesErrorException(
                     message: "Error ocurred while fetching repositories",
                     previous: $exception,
-                );
+                );*/
             }
         } else {
             throw new UnauthorizedException();

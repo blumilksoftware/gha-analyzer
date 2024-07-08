@@ -22,7 +22,7 @@ class FetchWorkflowRunsService
         protected GithubConnector $githubConnector,
     ) {}
 
-    public function fetchWorkflowRuns(RepositoryDTO $repositoryDto): void
+    public function fetchWorkflowRuns(RepositoryDTO $repositoryDto): Collection
     {
         $organization = Organization::query()->where("id", $repositoryDto->organizationId)->firstOrFail();
         $user = User::query()->where("id", Auth::user()->id)->firstOrFail();
@@ -39,6 +39,8 @@ class FetchWorkflowRunsService
                 $response = $this->githubConnector->send($request);
 
                 $this->storeWorkflowRuns($response->dto());
+
+                return $response->dto();
             } catch (Exception $exception) {
                 throw new FetchingWorkflowRunsErrorException(
                     message: "Error ocurred while fetching workflow runs",

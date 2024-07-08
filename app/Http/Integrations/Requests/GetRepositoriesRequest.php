@@ -23,7 +23,7 @@ class GetRepositoriesRequest extends Request
 
     public function resolveEndpoint(): string
     {
-        return "/orgs" . $this->organizationDto->name . "/repos";
+        return "/orgs/" . $this->organizationDto->name . "/repos";
     }
 
     public function createDtoFromResponse(Response $response): Collection
