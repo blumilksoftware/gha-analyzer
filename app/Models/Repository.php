@@ -23,4 +23,9 @@ class Repository extends Model
     {
         return $this->HasMany(WorkflowRun::class);
     }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
 }

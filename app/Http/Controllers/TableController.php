@@ -19,7 +19,10 @@ class TableController extends Controller
     {
         return Inertia::render("Table", [
             "colors" => $this->colorsService->getColors(),
-            "runs" => WorkflowRun::with(['workflowJobs', 'repository'])->get(),
+            "runs" => WorkflowRun::with([
+                'workflowJobs',
+                'repository.organization',
+            ])->get(),
         ]);
     }
 }

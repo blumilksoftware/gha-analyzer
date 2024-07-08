@@ -12,5 +12,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RepositoriesSeeder::class);
         $this->call(WorkflowRunsSeeder::class);
+        $this->call(OrganizationsSeeder::class);
     }
 }

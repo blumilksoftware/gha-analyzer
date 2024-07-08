@@ -62,7 +62,7 @@ function toLocalDate(date){
         </td>
         <td class="border p-2">
           <div class="text-gray-500 text-xs">
-            {{ run.repository.organization_id }}
+            {{ run.repository.organization.name }}
           </div>
           <div class="relative flex items-center py-0.5 text-sm">
             <span class="absolute shrink-0 flex items-center justify-center">
