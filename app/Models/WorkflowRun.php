@@ -23,4 +23,9 @@ class WorkflowRun extends Model
     {
         return $this->HasMany(WorkflowJob::class);
     }
+
+    public function repository()
+    {
+        return $this->belongsTo(Repository::class);
+    }
 }

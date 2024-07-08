@@ -17,8 +17,17 @@ const props = defineProps({
     type: Array,
   }
 })
+
+console.log(props.runs)
 var colors = props.colors
-const { runs } = toRefs(props);
+
+function totalRunPrice(jobs) {
+  var total = 0
+  jobs.forEach((job)=>{
+    total += job.minutes * job.multiplier * parseFloat(job.price_per_unit)
+  })
+  return total
+}
 
 </script>
 
@@ -27,60 +36,43 @@ const { runs } = toRefs(props);
     <title>Table</title>
   </Head>
   <br>
-  <h1 v-for="run in runs">{{ run.name }}</h1>
   <table class="w-full border-collapse border table-auto mt-4 text-sm">
     <thead>
       <tr class="text-left">
         <th class="border p-2 cursor-pointer" @click="">Date</th>
         <th class="border p-2 cursor-pointer" @click="">Repository</th>
-        <th class="border p-2 cursor-pointer" @click="">Quantity</th>
+        <th class="border p-2 cursor-pointer" @click=""># of Jobs</th>
         <th class="border p-2 cursor-pointer" @click="">Price</th>
-        <th class="border p-2 w-px">Unit</th>
-        <th class="border p-2 cursor-pointer" @click="">Author</th>
-        <th class="border p-2">Actions workflow file</th>
+        <th class="border p-2">Workflow Run Name</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="run in runs">
+      <tr v-for="run in props.runs">
         <td class="border p-2">
-          {{  }}
+          {{ run.created_at }}
           <div class="text-gray-500 text-xs">
             {{  }}
           </div>
         </td>
         <td class="border p-2">
           <div class="text-gray-500 text-xs">
-            {{ }}
+            {{ run.repository.organization_id }}
           </div>
           <div class="relative flex items-center py-0.5 text-sm">
             <span class="absolute shrink-0 flex items-center justify-center">
-              <span class="size-3 rounded-full" :class="run.repository.color" />
+              <span class="size-3 rounded-full"  />
             </span>
             <span class="ml-5 text-gray-900">{{ run.repository.name }}</span>
           </div>
         </td>
-        <td class="border p-2">{{ run.quantity }}</td>
+        <td class="border p-2">{{ run.workflow_jobs.length  }}</td>
         <td class="border p-2">
-          <div class="text-gray-500 text-xs">
-            {{ run.quantity }} &times; {{ run.price }}
-          </div>
-          ${{ run.total }}
+          ${{ totalRunPrice(run.workflow_jobs) }}
         </td>
         <td class="border p-2">
-          <img :src="run.unitLogo" :alt="run.unit" :title="run.unit" class="w-8">
+          {{ run.name }}
         </td>
-        <td class="border p-2">
-          <a v-if="run.author" :href="'https://github.com/' + run.author" class="flex items-center" target="_blank">
-            <img :src="'https://github.com/' + run.author + '.png'" class="size-6 rounded-full mr-2" :alt="run.author">
-            {{ run.author }}
-          </a>
-          <span v-else>
-            unknown
-          </span>
-        </td>
-        <td class="border p-2">
-          {{ run.workflow.replace('.github/workflows/', '') }}
-        </td>
+
       </tr>
       <tr>
         <td class="border p-2" colspan="2" />
