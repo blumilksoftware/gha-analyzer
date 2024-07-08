@@ -13,6 +13,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.14",
         "laravel/tinker": "^2.9",
+        "nesbot/carbon": "^3.6",
         "saloonphp/saloon": "^3.0"
     },
     "require-dev": {

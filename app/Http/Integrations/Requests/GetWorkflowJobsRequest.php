@@ -6,8 +6,6 @@ namespace App\Http\Integrations\Requests;
 
 use App\DTO\WorkflowJobDTO;
 use App\DTO\WorkflowRunDTO;
-use App\Models\Organization;
-use App\Models\Repository;
 use App\Models\WorkflowRun;
 use App\Services\CalculateJobTimeService;
 use App\Services\GetRunnerDataService;
@@ -23,24 +21,18 @@ class GetWorkflowJobsRequest extends Request
 
     public function __construct(
         protected WorkflowRunDTO $workflowRunDto,
+        protected string $organizationName,
+        protected string $repositoryName,
     ) {}
 
     public function resolveEndpoint(): string
     {
-        $repository = Repository::query()
-            ->where("id", $this->workflowRunDto->repositoryId)
-            ->firstOrFail();
-
-        $organization = Organization::query()
-            ->where("id", $repository->organization_id)
-            ->firstOrFail();
-
-        return "/repos/" . $organization->name . "/" . $repository->name . "/actions/runs/" . $this->workflowRunDto->githubId . "/jobs";
+        return "/repos/" . $this->organizationName . "/" . $this->repositoryName . "/actions/runs/" . $this->workflowRunDto->githubId . "/jobs";
     }
 
     public function createDtoFromResponse(Response $response): Collection
     {
-        $workflowRun = WorkflowRun::query()->where("github_id", $this->workflowRunDto->githubId)->firstOrFail();
+        $workflowRun = WorkflowRun::query()->where("github_id", $this->workflowRunDto->githubId)->first();
         $getRunnerDataService = new GetRunnerDataService();
         $calculateJobTimeService = new CalculateJobTimeService();
 

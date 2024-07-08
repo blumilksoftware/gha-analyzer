@@ -49,7 +49,7 @@ class FetchWorkflowJobsService
 
         if ($userOrganizationExists) {
             try {
-                $request = new GetWorkflowJobsRequest($workflowRunDto);
+                $request = new GetWorkflowJobsRequest($workflowRunDto, $organization->name, $repository->name);
 
                 $response = $this->githubConnector->send($request);
 
