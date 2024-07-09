@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Integrations\GithubConnector;
+use App\Jobs\FetchDataFromApi;
 use App\Models\User;
 use App\Services\AssignUserToOrganizationsService;
+use App\Services\FetchRepositoriesService;
+use App\Services\FetchWorkflowJobsService;
+use App\Services\FetchWorkflowRunsService;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -39,5 +44,20 @@ class GithubController extends Controller
         $this->assignUserService->assign($user);
 
         return redirect("/");
+    }
+
+    public function fetchData($organizationId): RedirectResponse
+    {
+        $userId = Auth::user()->id;
+
+        FetchDataFromApi::dispatch(
+            (int)$organizationId,
+            $githubConnector = new GithubConnector(),
+            new FetchRepositoriesService($githubConnector, $userId),
+            new FetchWorkflowRunsService($githubConnector, $userId),
+            new FetchWorkflowJobsService($githubConnector, $userId),
+        );
+
+        return redirect()->back();
     }
 }

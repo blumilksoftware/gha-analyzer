@@ -41,7 +41,7 @@ class FetchRepositoriesTest extends TestCase
             $this->organization->github_id,
             $this->organization->avatar_url,
         );
-        $this->fetchRepositoriesService = new FetchRepositoriesService($this->githubConnector);
+        $this->fetchRepositoriesService = new FetchRepositoriesService($this->githubConnector, $this->user->id);
         $this->actingAs($this->user);
 
         MockClient::destroyGlobal();

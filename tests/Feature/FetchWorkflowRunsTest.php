@@ -44,7 +44,7 @@ class FetchWorkflowRunsTest extends TestCase
             $this->repository->organization_id,
             $this->repository->is_private,
         );
-        $this->fetchWorkflowRunsService = new FetchWorkflowRunsService($this->githubConnector);
+        $this->fetchWorkflowRunsService = new FetchWorkflowRunsService($this->githubConnector, $this->user->id);
         $this->actingAs($this->user);
 
         MockClient::destroyGlobal();

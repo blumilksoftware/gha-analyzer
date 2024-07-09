@@ -8,6 +8,7 @@ use App\Http\Integrations\GithubConnector;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Redis;
 use Saloon\Config as SaloonConfig;
 use Saloon\Enums\Method;
 use Saloon\Http\Faking\MockClient;
@@ -43,6 +44,12 @@ class RateLimiterTest extends TestCase
         };
 
         MockClient::destroyGlobal();
+    }
+
+    protected function tearDown(): void
+    {
+        Redis::flushall();
+        parent::tearDown();
     }
 
     public function testRateLimitNotReached(): void
