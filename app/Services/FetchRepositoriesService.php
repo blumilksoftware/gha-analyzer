@@ -13,19 +13,19 @@ use App\Models\Repository;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\UnauthorizedException;
 
 class FetchRepositoriesService
 {
     public function __construct(
         protected GithubConnector $githubConnector,
+        protected int $userId,
     ) {}
 
     public function fetchRepositories(OrganizationDTO $organizationDto): Collection
     {
         $organization = Organization::query()->where("github_id", $organizationDto->githubId)->firstOrFail();
-        $user = User::query()->where("id", Auth::user()->id)->firstOrFail();
+        $user = User::query()->where("id", $this->userId)->firstOrFail();
 
         $userOrganizationExists = $user->organizations()
             ->where("organization_id", $organization->id)
@@ -34,7 +34,7 @@ class FetchRepositoriesService
 
         if ($userOrganizationExists) {
             try {
-                $request = new GetRepositoriesRequest($organizationDto);
+                $request = new GetRepositoriesRequest($organizationDto, $user);
 
                 $response = $this->githubConnector->send($request);
 
@@ -42,11 +42,10 @@ class FetchRepositoriesService
 
                 return $response->dto();
             } catch (Exception $exception) {
-                throw $exception;
-                /*throw new FetchingRepositoriesErrorException(
+                throw new FetchingRepositoriesErrorException(
                     message: "Error ocurred while fetching repositories",
                     previous: $exception,
-                );*/
+                );
             }
         } else {
             throw new UnauthorizedException();

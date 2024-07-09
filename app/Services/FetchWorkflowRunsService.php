@@ -13,19 +13,19 @@ use App\Models\User;
 use App\Models\WorkflowRun;
 use Exception;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\UnauthorizedException;
 
 class FetchWorkflowRunsService
 {
     public function __construct(
         protected GithubConnector $githubConnector,
+        protected int $userId,
     ) {}
 
     public function fetchWorkflowRuns(RepositoryDTO $repositoryDto): Collection
     {
         $organization = Organization::query()->where("id", $repositoryDto->organizationId)->firstOrFail();
-        $user = User::query()->where("id", Auth::user()->id)->firstOrFail();
+        $user = User::query()->where("id", $this->userId)->firstOrFail();
 
         $userOrganizationExists = $user->organizations()
             ->where("organization_id", $organization->id)
@@ -34,7 +34,7 @@ class FetchWorkflowRunsService
 
         if ($userOrganizationExists) {
             try {
-                $request = new GetWorkflowRunsRequest($repositoryDto);
+                $request = new GetWorkflowRunsRequest($repositoryDto, $user);
 
                 $response = $this->githubConnector->send($request);
 

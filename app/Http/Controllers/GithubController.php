@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\DTO\OrganizationDTO;
 use App\Http\Integrations\GithubConnector;
-use App\Models\Organization;
+use App\Jobs\FetchDataFromApi;
 use App\Models\User;
 use App\Services\AssignUserToOrganizationsService;
 use App\Services\FetchRepositoriesService;
@@ -20,10 +19,6 @@ class GithubController extends Controller
 {
     public function __construct(
         protected AssignUserToOrganizationsService $assignUserService,
-        protected FetchRepositoriesService $fetchRepositoriesService,
-        protected FetchWorkflowRunsService $fetchWorkflowRunsService,
-        protected FetchWorkflowJobsService $fetchWorkflowJobsService,
-        protected GithubConnector $githubConnector,
     ) {}
 
     public function redirect(): RedirectResponse
@@ -53,25 +48,15 @@ class GithubController extends Controller
 
     public function fetchData($organizationId): RedirectResponse
     {
-        $organization = Organization::query()->where("id", $organizationId)->first();
-        $organizationDto = new OrganizationDTO(
-            $organization->name,
-            $organization->github_id,
-            $organization->avatar_url,
+        $userId = Auth::user()->id;
+
+        FetchDataFromApi::dispatch(
+            (int)$organizationId,
+            $githubConnector = new GithubConnector(),
+            new FetchRepositoriesService($githubConnector, $userId),
+            new FetchWorkflowRunsService($githubConnector, $userId),
+            new FetchWorkflowJobsService($githubConnector, $userId),
         );
-
-        $repositories = collect();
-        $repositories = $this->fetchRepositoriesService->fetchRepositories($organizationDto);
-
-        $workflowRuns = collect();
-
-        foreach ($repositories as $repositoryDto) {
-            $workflowRuns = $workflowRuns->union($this->fetchWorkflowRunsService->fetchWorkflowRuns($repositoryDto));
-        }
-
-        foreach ($workflowRuns as $workflowRunDto) {
-            $this->fetchWorkflowJobsService->fetchWorkflowJobs($workflowRunDto);
-        }
 
         return redirect()->back();
     }

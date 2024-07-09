@@ -15,13 +15,13 @@ use App\Models\WorkflowJob;
 use App\Models\WorkflowRun;
 use Exception;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\UnauthorizedException;
 
 class FetchWorkflowJobsService
 {
     public function __construct(
         protected GithubConnector $githubConnector,
+        protected int $userId,
     ) {}
 
     public function fetchWorkflowJobs(WorkflowRunDTO $workflowRunDto): void
@@ -40,7 +40,7 @@ class FetchWorkflowJobsService
             ->where("id", $repository->organization_id)
             ->firstOrFail();
 
-        $user = User::query()->where("id", Auth::user()->id)->firstOrFail();
+        $user = User::query()->where("id", $this->userId)->firstOrFail();
 
         $userOrganizationExists = $user->organizations()
             ->where("organization_id", $organization->id)
@@ -49,7 +49,7 @@ class FetchWorkflowJobsService
 
         if ($userOrganizationExists) {
             try {
-                $request = new GetWorkflowJobsRequest($workflowRunDto, $organization->name, $repository->name);
+                $request = new GetWorkflowJobsRequest($workflowRunDto, $organization->name, $repository->name, $user);
 
                 $response = $this->githubConnector->send($request);
 

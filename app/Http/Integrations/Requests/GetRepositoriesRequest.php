@@ -7,8 +7,8 @@ namespace App\Http\Integrations\Requests;
 use App\DTO\OrganizationDTO;
 use App\DTO\RepositoryDTO;
 use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
@@ -19,6 +19,7 @@ class GetRepositoriesRequest extends Request
 
     public function __construct(
         protected OrganizationDTO $organizationDto,
+        protected User $user,
     ) {}
 
     public function resolveEndpoint(): string
@@ -49,7 +50,7 @@ class GetRepositoriesRequest extends Request
     protected function defaultHeaders(): array
     {
         return [
-            "Authorization" => "Bearer " . Auth::user()->github_token,
+            "Authorization" => "Bearer " . $this->user->github_token,
         ];
     }
 }
