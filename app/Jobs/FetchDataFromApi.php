@@ -42,8 +42,6 @@ class FetchDataFromApi implements ShouldQueue
             $organization->avatar_url,
         );
 
-        Log::info("guwno");
-
         $repositories = collect();
         $repositories = $this->fetchRepositoriesService->fetchRepositories($organizationDto);
 
