@@ -24,6 +24,11 @@ function getNavigationClass (tab) {
           <Link href="/repositories"><span :class="getNavigationClass('/repositories')" class="cursor-pointer px-8 py-4 text-xs rounded-md bg-blue-400/50 hover:bg-blue-400/75" href="/table">Repositories</span></Link>
           <Link href="/authors"><span :class="getNavigationClass('/authors')" class="cursor-pointer px-8 py-4 text-xs rounded-md bg-blue-400/50 hover:bg-blue-400/75" href="/table">Authors</span></Link>
         </div>
+        <a href="/auth/redirect">
+          <div class="ml-auto border-2 p-4 border-black rounded-md hover:bg-black">
+            Log In with GitHub
+          </div>
+        </a>
       </nav>
     </div>
   </div>
