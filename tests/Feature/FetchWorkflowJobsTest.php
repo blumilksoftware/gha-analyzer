@@ -49,7 +49,7 @@ class FetchWorkflowJobsTest extends TestCase
             new DateTime($this->workflowRun->github_created_at),
         );
         $this->repository = Repository::query()->where("id", $this->workflowRun->repository_id)->firstOrFail();
-        $this->fetchWorkflowJobsService = new FetchWorkflowJobsService($this->githubConnector);
+        $this->fetchWorkflowJobsService = new FetchWorkflowJobsService($this->githubConnector, $this->user->id);
         $this->actingAs($this->user);
 
         MockClient::destroyGlobal();

@@ -8,9 +8,9 @@ use App\DTO\RepositoryDTO;
 use App\DTO\WorkflowRunDTO;
 use App\Models\Organization;
 use App\Models\Repository;
+use App\Models\User;
 use DateTime;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
@@ -21,6 +21,7 @@ class GetWorkflowRunsRequest extends Request
 
     public function __construct(
         protected RepositoryDTO $repositoryDto,
+        protected User $user,
     ) {}
 
     public function resolveEndpoint(): string
@@ -55,7 +56,7 @@ class GetWorkflowRunsRequest extends Request
     protected function defaultHeaders(): array
     {
         return [
-            "Authorization" => "Bearer " . Auth::user()->github_token,
+            "Authorization" => "Bearer " . $this->user->github_token,
         ];
     }
 }

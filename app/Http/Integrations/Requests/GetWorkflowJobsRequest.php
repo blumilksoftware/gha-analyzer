@@ -6,11 +6,11 @@ namespace App\Http\Integrations\Requests;
 
 use App\DTO\WorkflowJobDTO;
 use App\DTO\WorkflowRunDTO;
+use App\Models\User;
 use App\Models\WorkflowRun;
 use App\Services\CalculateJobTimeService;
 use App\Services\GetRunnerDataService;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
@@ -23,6 +23,7 @@ class GetWorkflowJobsRequest extends Request
         protected WorkflowRunDTO $workflowRunDto,
         protected string $organizationName,
         protected string $repositoryName,
+        protected User $user,
     ) {}
 
     public function resolveEndpoint(): string
@@ -62,7 +63,7 @@ class GetWorkflowJobsRequest extends Request
     protected function defaultHeaders(): array
     {
         return [
-            "Authorization" => "Bearer " . Auth::user()->github_token,
+            "Authorization" => "Bearer " . $this->user->github_token,
         ];
     }
 }
