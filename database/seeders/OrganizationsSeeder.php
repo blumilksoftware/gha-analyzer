@@ -1,21 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Organization;
 use App\Models\Repository;
+use Illuminate\Database\Seeder;
 
 class OrganizationsSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         Organization::factory()
             ->count(10)
             ->create()
-            ->each(function ($organization) {
+            ->each(function ($organization): void {
                 Repository::factory()->count(5)->create([
-                    'organization_id' => $organization->id,
+                    "organization_id" => $organization->id,
                 ]);
             });
     }

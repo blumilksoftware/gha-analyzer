@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
 use App\Services\ColorsService;
 use Inertia\Inertia;
-use App\Models\WorkflowJob;
-use App\Models\WorkflowRun;
 
 class TableController extends Controller
 {
@@ -15,14 +14,35 @@ class TableController extends Controller
         protected ColorsService $colorsService,
     ) {}
 
-    public function show()
+    public function show($organizationId)
     {
+        $organization = Organization::query()->where("id", (int)$organizationId)->first();
+        $repositories = $organization->repositories()->get();
+        $repositoriesArray = $organization->repositories()->get()->toArray();
+
+        $runs = [];
+        $runsArray = [];
+
+        foreach ($repositories as $repository) {
+            array_push($runs, $repository->workflowRuns()->get());
+            array_push($runsArray, $repository->workflowRuns()->get()->toArray());
+        }
+
+        $jobs = [];
+        $jobsArray = [];
+
+        foreach ($runs as $runsCollection) {
+            foreach ($runsCollection as $run) {
+                array_push($jobs, $run->workflowJobs()->get());
+                array_push($jobsArray, $run->workflowJobs()->get()->toArray());
+            }
+        }
+
         return Inertia::render("Table", [
             "colors" => $this->colorsService->getColors(),
-            "runs" => WorkflowRun::with([
-                'workflowJobs',
-                'repository.organization',
-            ])->get(),
+            "repositories" => $repositoriesArray,
+            "runs" => $runsArray,
+            "jobs" => $jobsArray,
         ]);
     }
 }

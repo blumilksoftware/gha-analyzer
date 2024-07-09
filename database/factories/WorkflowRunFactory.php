@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\Repository;
-use App\Models\WorkflowRun;
 use App\Models\WorkflowJob;
+use App\Models\WorkflowRun;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class WorkflowRunFactory extends Factory
@@ -23,8 +23,8 @@ class WorkflowRunFactory extends Factory
 
     public function hasJobs(int $count)
     {
-        return $this->afterCreating(function (WorkflowRun $workflowRun) use ($count) {
-            WorkflowJob::factory()->count($count)->create(['workflow_run_id' => $workflowRun->id]);
+        return $this->afterCreating(function (WorkflowRun $workflowRun) use ($count): void {
+            WorkflowJob::factory()->count($count)->create(["workflow_run_id" => $workflowRun->id]);
         });
     }
 }
