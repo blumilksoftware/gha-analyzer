@@ -14,7 +14,7 @@ class TableController extends Controller
         protected ColorsService $colorsService,
     ) {}
 
-    public function show($organizationId)
+    public function show($organizationId = 1)
     {
         $organization = Organization::query()->where("id", (int)$organizationId)->first();
         $repositories = $organization->repositories()->get();
