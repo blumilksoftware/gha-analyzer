@@ -13,21 +13,16 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  runs: {
+  repositories: {
     type: Array,
-  }
+  },
+
 })
 
-console.log(props.runs)
+console.log(props.repositories)
 var colors = props.colors
 
-function totalRunPrice(jobs) {
-  var total = 0
-  jobs.forEach((job)=>{
-    total += job.minutes * job.multiplier * parseFloat(job.price_per_unit)
-  })
-  return total
-}
+
 
 function toLocalDate(date){
   var dateObj = new Date(date)
@@ -48,35 +43,35 @@ function toLocalDate(date){
         <th class="border p-2 cursor-pointer" @click="">Date</th>
         <th class="border p-2 cursor-pointer" @click="">Repository</th>
         <th class="border p-2 cursor-pointer" @click=""># of Jobs</th>
-        <th class="border p-2 cursor-pointer" @click="">Run Price</th>
-        <th class="border p-2">Workflow Run Name</th>
+        <th class="border p-2 cursor-pointer" @click="">repo Price</th>
+        <th class="border p-2">Workflow repo Name</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="run in props.runs">
+      <tr v-for="repo in props.repositories">
         <td class="border p-2">
-          {{ toLocalDate(run.created_at) }}
+          {{ toLocalDate(repo.created_at) }}
           <div class="text-gray-500 text-xs">
             {{  }}
           </div>
         </td>
         <td class="border p-2">
           <div class="text-gray-500 text-xs">
-            {{ run.repository.organization.name }}
+            {{ }}
           </div>
           <div class="relative flex items-center py-0.5 text-sm">
             <span class="absolute shrink-0 flex items-center justify-center">
               <span class="size-3 rounded-full"  />
             </span>
-            <span class="ml-5 text-gray-900">{{ run.repository.name }}</span>
+            <span class="ml-5 text-gray-900">{{ repo.name }}</span>
           </div>
         </td>
-        <td class="border p-2">{{ run.workflow_jobs.length  }}</td>
+        <td class="border p-2">{{   }}</td>
         <td class="border p-2">
-          ${{ totalRunPrice(run.workflow_jobs) }}
+          ${{  }}
         </td>
         <td class="border p-2">
-          {{ run.name }}
+          {{ repo.name }}
         </td>
 
       </tr>
