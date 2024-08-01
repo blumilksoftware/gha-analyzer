@@ -11,12 +11,16 @@ class WorkflowJobFactory extends Factory
 {
     public function definition(): array
     {
-        $osArray = ["ubuntu", "windows"];
-        $typeArray = ["standard", "4", "8", "16", "32", "64"];
+        $osArray = ["ubuntu", "windows", "macos"];
+        $typeArray = [
+            ["standard", "4", "8", "16", "32", "64"],
+            ["standard", "4", "8", "16", "32", "64"],
+            ["standard", "12"],
+        ];
         $runnerOsKey = array_rand($osArray, 1);
-        $runnerTypeKey = array_rand($typeArray, 1);
+        $runnerTypeKey = array_rand($typeArray[$runnerOsKey], 1);
         $runnerOs = $osArray[$runnerOsKey];
-        $runnerType = $typeArray[$runnerTypeKey];
+        $runnerType = $typeArray[$runnerOsKey][$runnerTypeKey];
 
         return [
             "github_id" => $this->faker->unique()->randomNumber(),
