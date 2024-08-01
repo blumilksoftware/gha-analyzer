@@ -48,7 +48,7 @@ class RateLimiterTest extends TestCase
 
     protected function tearDown(): void
     {
-        Redis::flushall();
+        Cache::flush();
         parent::tearDown();
     }
 

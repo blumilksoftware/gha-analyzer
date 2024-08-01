@@ -41,7 +41,7 @@ class GithubConnector extends Connector
 
     protected function resolveRateLimitStore(): RateLimitStore
     {
-        return new LaravelCacheStore(Cache::store("redis"));
+        return new LaravelCacheStore(Cache::store());
     }
 
     protected function handleTooManyAttempts(Response $response, Limit $limit): void

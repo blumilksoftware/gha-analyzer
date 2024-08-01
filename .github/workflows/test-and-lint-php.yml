@@ -33,11 +33,6 @@ jobs:
         ports:
           - 5432:5432
 
-      redis:
-        image: redis:7.2.4-alpine3.19
-        ports:
-          - 6379:6379
-
     steps:
       - uses: actions/checkout@v4.1.4 # https://github.com/actions/checkout
 
@@ -63,6 +58,9 @@ jobs:
 
       - name: Run PHP linter
         run: composer cs
+
+      - name: Copy .env
+        run: cp .env.ci .env
 
       - name: Execute tests
         run: php artisan test --env=ci
