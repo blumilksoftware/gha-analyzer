@@ -60,11 +60,11 @@ class GithubController extends Controller
         $batch = Bus::findBatch($batchId);
 
         if ($batch === null) {
-            return \response()->json(["message" => "Batch not found"], 404);
+            return response()->json(["message" => "Batch not found"], 404);
         }
 
         if ($batch->cancelled()) {
-            return \response()->json(["message" => "There was an error, please try again latter."], 500);
+            return response()->json(["message" => "There was an error, please try again latter."], 500);
         }
 
         return response()->json([
