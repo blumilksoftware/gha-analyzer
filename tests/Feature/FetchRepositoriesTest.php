@@ -41,7 +41,7 @@ class FetchRepositoriesTest extends TestCase
             $this->organization->github_id,
             $this->organization->avatar_url,
         );
-        $this->fetchRepositoriesService = new FetchRepositoriesService($this->githubConnector, $this->user->id);
+        $this->fetchRepositoriesService = new FetchRepositoriesService($this->githubConnector);
         $this->actingAs($this->user);
 
         MockClient::destroyGlobal();
@@ -64,7 +64,7 @@ class FetchRepositoriesTest extends TestCase
 
         $this->githubConnector->withMockClient($mockClient);
 
-        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto);
+        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto, $this->user->id);
 
         $this->assertDatabaseHas("repositories", [
             "github_id" => 123,
@@ -93,7 +93,7 @@ class FetchRepositoriesTest extends TestCase
 
         $this->expectException(UnauthorizedException::class);
 
-        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto);
+        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto, $this->user->id);
 
         $this->assertDatabaseMissing("repositories", [
             "github_id" => 123,
@@ -120,7 +120,7 @@ class FetchRepositoriesTest extends TestCase
 
         $this->expectException(UnauthorizedException::class);
 
-        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto);
+        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto, $this->user->id);
 
         $this->assertDatabaseMissing("repositories", [
             "github_id" => 123,
@@ -142,7 +142,7 @@ class FetchRepositoriesTest extends TestCase
 
         $this->expectException(FetchingRepositoriesErrorException::class);
 
-        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto);
+        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto, $this->user->id);
     }
 
     public function testfetchRepositoriesWithStatus404(): void
@@ -157,6 +157,6 @@ class FetchRepositoriesTest extends TestCase
 
         $this->expectException(FetchingRepositoriesErrorException::class);
 
-        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto);
+        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto, $this->user->id);
     }
 }

@@ -19,13 +19,12 @@ class FetchWorkflowRunsService
 {
     public function __construct(
         protected GithubConnector $githubConnector,
-        protected int $userId,
     ) {}
 
-    public function fetchWorkflowRuns(RepositoryDTO $repositoryDto): Collection
+    public function fetchWorkflowRuns(RepositoryDTO $repositoryDto, int $userId): Collection
     {
         $organization = Organization::query()->where("id", $repositoryDto->organizationId)->firstOrFail();
-        $user = User::query()->where("id", $this->userId)->firstOrFail();
+        $user = User::query()->where("id", $userId)->firstOrFail();
 
         $userOrganizationExists = $user->organizations()
             ->where("organization_id", $organization->id)

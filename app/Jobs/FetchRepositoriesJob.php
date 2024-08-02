@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\DTO\OrganizationDTO;
-use App\Http\Integrations\GithubConnector;
 use App\Models\Organization;
 use App\Services\FetchRepositoriesService;
-use App\Services\FetchWorkflowJobsService;
-use App\Services\FetchWorkflowRunsService;
+use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,8 +15,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Saloon\RateLimitPlugin\Helpers\ApiRateLimited;
 
-class FetchDataFromApi implements ShouldQueue
+class FetchRepositoriesJob implements ShouldQueue
 {
+    use Batchable;
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
@@ -26,13 +25,10 @@ class FetchDataFromApi implements ShouldQueue
 
     public function __construct(
         protected int $organizationId,
-        protected GithubConnector $githubConnector,
-        protected FetchRepositoriesService $fetchRepositoriesService,
-        protected FetchWorkflowRunsService $fetchWorkflowRunsService,
-        protected FetchWorkflowJobsService $fetchWorkflowJobsService,
+        protected int $userId,
     ) {}
 
-    public function handle(): void
+    public function handle(FetchRepositoriesService $service): void
     {
         $organization = Organization::query()->where("id", $this->organizationId)->firstOrFail();
         $organizationDto = new OrganizationDTO(
@@ -41,17 +37,10 @@ class FetchDataFromApi implements ShouldQueue
             $organization->avatar_url,
         );
 
-        $repositories = collect();
-        $repositories = $this->fetchRepositoriesService->fetchRepositories($organizationDto);
-
-        $workflowRuns = collect();
+        $repositories = $service->fetchRepositories($organizationDto, $this->userId);
 
         foreach ($repositories as $repositoryDto) {
-            $workflowRuns = $workflowRuns->union($this->fetchWorkflowRunsService->fetchWorkflowRuns($repositoryDto));
-        }
-
-        foreach ($workflowRuns as $workflowRunDto) {
-            $this->fetchWorkflowJobsService->fetchWorkflowJobs($workflowRunDto);
+            $this->batch()->add(new FetchWorkflowRuns($this->userId, $repositoryDto));
         }
     }
 

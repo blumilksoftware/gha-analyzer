@@ -77,7 +77,7 @@ class FetchWorkflowJobsTest extends TestCase
 
         $this->githubConnector->withMockClient($mockClient);
 
-        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto);
+        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto, $this->user->id);
 
         $this->assertDatabaseHas("workflow_jobs", [
             "github_id" => 123,
@@ -116,7 +116,7 @@ class FetchWorkflowJobsTest extends TestCase
 
         $this->githubConnector->withMockClient($mockClient);
 
-        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto);
+        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto, $this->user->id);
 
         $this->assertDatabaseMissing("workflow_jobs", [
             "github_id" => 123,
@@ -154,7 +154,7 @@ class FetchWorkflowJobsTest extends TestCase
 
         $this->expectException(UnauthorizedException::class);
 
-        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto);
+        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto, $this->user->id);
 
         $this->assertDatabaseMissing("workflow_jobs", [
             "github_id" => 123,
@@ -190,7 +190,7 @@ class FetchWorkflowJobsTest extends TestCase
 
         $this->expectException(UnauthorizedException::class);
 
-        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto);
+        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto, $this->user->id);
 
         $this->assertDatabaseMissing("workflow_jobs", [
             "github_id" => 123,
@@ -216,7 +216,7 @@ class FetchWorkflowJobsTest extends TestCase
 
         $this->expectException(FetchingWorkflowJobsErrorException::class);
 
-        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto);
+        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto, $this->user->id);
     }
 
     public function testFetchWorkflowJobsWithStatus404(): void
@@ -231,6 +231,6 @@ class FetchWorkflowJobsTest extends TestCase
 
         $this->expectException(FetchingWorkflowJobsErrorException::class);
 
-        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto);
+        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto, $this->user->id);
     }
 }

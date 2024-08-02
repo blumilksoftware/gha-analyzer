@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Integrations\GithubConnector;
-use App\Jobs\FetchDataFromApi;
+use App\Jobs\FetchRepositoriesJob;
 use App\Models\User;
 use App\Services\AssignUserToOrganizationsService;
-use App\Services\FetchRepositoriesService;
-use App\Services\FetchWorkflowJobsService;
-use App\Services\FetchWorkflowRunsService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Bus;
 use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -46,18 +44,33 @@ class GithubController extends Controller
         return redirect("/");
     }
 
-    public function fetchData($organizationId): RedirectResponse
+    public function fetchData(int $organizationId): JsonResponse
     {
-        $userId = Auth::user()->id;
+        $jobs = [
+            new FetchRepositoriesJob($organizationId, Auth::user()->id),
+        ];
 
-        FetchDataFromApi::dispatch(
-            (int)$organizationId,
-            $githubConnector = new GithubConnector(),
-            new FetchRepositoriesService($githubConnector, $userId),
-            new FetchWorkflowRunsService($githubConnector, $userId),
-            new FetchWorkflowJobsService($githubConnector, $userId),
-        );
+        $batch = Bus::batch($jobs)->dispatch();
 
-        return redirect()->back();
+        return response()->json(["batch" => $batch->id]);
+    }
+
+    public function status(string $batchId): JsonResponse
+    {
+        $batch = Bus::findBatch($batchId);
+
+        if ($batch === null) {
+            return \response()->json(["message" => "Batch not found"], 404);
+        }
+
+        if ($batch->cancelled()) {
+            return \response()->json(["message" => "There was an error, please try again latter."], 500);
+        }
+
+        return response()->json([
+            "all" => $batch->totalJobs,
+            "done" => $batch->processedJobs(),
+            "finished" => $batch->finished(),
+        ]);
     }
 }

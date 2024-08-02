@@ -19,13 +19,12 @@ class FetchRepositoriesService
 {
     public function __construct(
         protected GithubConnector $githubConnector,
-        protected int $userId,
     ) {}
 
-    public function fetchRepositories(OrganizationDTO $organizationDto): Collection
+    public function fetchRepositories(OrganizationDTO $organizationDto, int $userId): Collection
     {
         $organization = Organization::query()->where("github_id", $organizationDto->githubId)->firstOrFail();
-        $user = User::query()->where("id", $this->userId)->firstOrFail();
+        $user = User::query()->where("id", $userId)->firstOrFail();
 
         $userOrganizationExists = $user->organizations()
             ->where("organization_id", $organization->id)

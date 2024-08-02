@@ -44,7 +44,7 @@ class FetchWorkflowRunsTest extends TestCase
             $this->repository->organization_id,
             $this->repository->is_private,
         );
-        $this->fetchWorkflowRunsService = new FetchWorkflowRunsService($this->githubConnector, $this->user->id);
+        $this->fetchWorkflowRunsService = new FetchWorkflowRunsService($this->githubConnector);
         $this->actingAs($this->user);
 
         MockClient::destroyGlobal();
@@ -68,7 +68,7 @@ class FetchWorkflowRunsTest extends TestCase
 
         $this->githubConnector->withMockClient($mockClient);
 
-        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto);
+        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto, $this->user->id);
 
         $this->assertDatabaseHas("workflow_runs", [
             "github_id" => 123,
@@ -98,7 +98,7 @@ class FetchWorkflowRunsTest extends TestCase
 
         $this->expectException(UnauthorizedException::class);
 
-        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto);
+        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto, $this->user->id);
 
         $this->assertDatabaseMissing("workflow_runs", [
             "github_id" => 123,
@@ -126,7 +126,7 @@ class FetchWorkflowRunsTest extends TestCase
 
         $this->expectException(UnauthorizedException::class);
 
-        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto);
+        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto, $this->user->id);
 
         $this->assertDatabaseMissing("workflow_runs", [
             "github_id" => 123,
@@ -148,7 +148,7 @@ class FetchWorkflowRunsTest extends TestCase
 
         $this->expectException(FetchingWorkflowRunsErrorException::class);
 
-        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto);
+        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto, $this->user->id);
     }
 
     public function testFetchWorkflowRunsWithStatus404(): void
@@ -163,6 +163,6 @@ class FetchWorkflowRunsTest extends TestCase
 
         $this->expectException(FetchingWorkflowRunsErrorException::class);
 
-        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto);
+        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto, $this->user->id);
     }
 }
