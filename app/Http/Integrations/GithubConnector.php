@@ -13,6 +13,7 @@ use Saloon\RateLimitPlugin\Limit;
 use Saloon\RateLimitPlugin\Stores\LaravelCacheStore;
 use Saloon\RateLimitPlugin\Traits\HasRateLimits;
 use Saloon\Traits\Plugins\AlwaysThrowOnErrors;
+use Symfony\Component\HttpFoundation\Response as Status;
 
 class GithubConnector extends Connector
 {
@@ -46,7 +47,7 @@ class GithubConnector extends Connector
 
     protected function handleTooManyAttempts(Response $response, Limit $limit): void
     {
-        if ($response->status() !== 429 && $response->status() !== 403) {
+        if (!in_array($response->status(), [Status::HTTP_TOO_MANY_REQUESTS, Status::HTTP_FORBIDDEN], false)) {
             return;
         }
 
