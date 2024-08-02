@@ -47,7 +47,7 @@ class GithubConnector extends Connector
 
     protected function handleTooManyAttempts(Response $response, Limit $limit): void
     {
-        if (!in_array($response->status(), [Status::HTTP_TOO_MANY_REQUESTS, Status::HTTP_FORBIDDEN], false)) {
+        if (!in_array($response->status(), [Status::HTTP_TOO_MANY_REQUESTS, Status::HTTP_FORBIDDEN], true)) {
             return;
         }
 
