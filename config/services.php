@@ -27,6 +27,7 @@ return [
         "type" => "Organization",
     ],
     "runners" => [
+        "os" => ["ubuntu", "windows", "macos"],
         "multiplier" => [
             "ubuntu" => 1,
             "windows" => 2,
