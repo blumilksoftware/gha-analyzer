@@ -34,7 +34,7 @@ class WorkflowRun extends Model
         "name",
         "repository_id",
         "github_created_at",
-        "workflow_actor_id"
+        "workflow_actor_id",
     ];
 
     public function repository(): BelongsTo
