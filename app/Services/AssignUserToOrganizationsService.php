@@ -24,6 +24,14 @@ class AssignUserToOrganizationsService
             foreach ($response->json() as $data) {
                 $organization = Organization::query()->where("github_id", $data["id"])->first();
 
+                if ($organization === null) {
+                    $organization = Organization::create([
+                        "name" => $data["login"],
+                        "github_id" => $data["id"],
+                        "avatar_url" => $data["avatar_url"],
+                    ]);
+                }
+
                 if ($this->getRole($user, $organization->name) === "admin") {
                     $user->organizations()->syncWithoutDetaching([
                         $organization->id => ["is_admin" => true],
