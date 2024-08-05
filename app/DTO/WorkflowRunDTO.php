@@ -13,5 +13,6 @@ class WorkflowRunDTO
         public string $name,
         public int $repositoryId,
         public DateTime $createdAt,
+        public WorkflowActorDTO $actor,
     ) {}
 }

@@ -8,9 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
 
 /**
  * @property int $id
@@ -20,10 +18,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
- * @property Collection<User> $users
- * @property Collection<Repository> $repositories
+ * @property Collection<WorkflowRun> $workflowRuns
  */
-class Organization extends Model
+class WorkflowActor extends Model
 {
     use HasFactory;
 
@@ -33,13 +30,8 @@ class Organization extends Model
         "avatar_url",
     ];
 
-    public function users(): BelongsToMany
+    public function workflowRuns(): HasMany
     {
-        return $this->belongsToMany(User::class, "user_organization");
-    }
-
-    public function repositories(): HasMany
-    {
-        return $this->HasMany(Repository::class);
+        return $this->hasMany(WorkflowRun::class);
     }
 }

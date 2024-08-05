@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\DTO\WorkflowActorDTO;
 use App\DTO\WorkflowRunDTO;
 use App\Exceptions\FetchingWorkflowJobsErrorException;
 use App\Http\Integrations\GithubConnector;
@@ -11,6 +12,7 @@ use App\Http\Integrations\Requests\GetWorkflowJobsRequest;
 use App\Models\Organization;
 use App\Models\Repository;
 use App\Models\User;
+use App\Models\WorkflowActor;
 use App\Models\WorkflowJob;
 use App\Models\WorkflowRun;
 use App\Services\FetchWorkflowJobsService;
@@ -29,10 +31,12 @@ class FetchWorkflowJobsTest extends TestCase
     protected User $user;
     protected Repository $repository;
     protected WorkflowRun $workflowRun;
+    protected WorkflowActor $workflowActor;
     protected Organization $organization;
     protected FetchWorkflowJobsService $fetchWorkflowJobsService;
     protected GithubConnector $githubConnector;
     protected WorkflowRunDTO $workflowRunDto;
+    protected WorkflowActorDTO $workflowActorDto;
 
     protected function setUp(): void
     {
@@ -41,15 +45,23 @@ class FetchWorkflowJobsTest extends TestCase
 
         $this->githubConnector = new GithubConnector();
         $this->user = User::factory()->create();
+
         $this->workflowRun = WorkflowRun::factory()->create();
+        $this->workflowActorDto = new WorkflowActorDTO(
+            $this->workflowRun->workflowActor->github_id,
+            $this->workflowRun->workflowActor->name,
+            $this->workflowRun->workflowActor->avatar_url,
+        );
+
         $this->workflowRunDto = new WorkflowRunDTO(
             $this->workflowRun->github_id,
             $this->workflowRun->name,
             $this->workflowRun->repository_id,
             new DateTime($this->workflowRun->github_created_at),
+            $this->workflowActorDto,
         );
         $this->repository = Repository::query()->where("id", $this->workflowRun->repository_id)->firstOrFail();
-        $this->fetchWorkflowJobsService = new FetchWorkflowJobsService($this->githubConnector, $this->user->id);
+        $this->fetchWorkflowJobsService = new FetchWorkflowJobsService($this->githubConnector);
         $this->actingAs($this->user);
 
         MockClient::destroyGlobal();
@@ -67,6 +79,7 @@ class FetchWorkflowJobsTest extends TestCase
                         "name" => "job1",
                         "started_at" => "2024-06-19T08:25:09Z",
                         "completed_at" => "2024-06-19T08:26:09Z",
+                        "conclusion" => "success",
                         "labels" => [
                             "ubuntu-latest",
                         ],
@@ -106,6 +119,44 @@ class FetchWorkflowJobsTest extends TestCase
                         "name" => "job1",
                         "started_at" => "2024-06-19T08:25:09Z",
                         "completed_at" => "2024-06-19T08:26:09Z",
+                        "conclusion" => "success",
+                        "labels" => [
+                            "ubuntu-latest",
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $this->githubConnector->withMockClient($mockClient);
+
+        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto, $this->user->id);
+
+        $this->assertDatabaseMissing("workflow_jobs", [
+            "github_id" => 123,
+            "name" => "job1",
+            "workflow_run_id" => $this->workflowRun->id,
+            "runner_os" => "ubuntu",
+            "runner_type" => "standard",
+            "minutes" => 1,
+            "multiplier" => 1,
+            "price_per_unit" => 0.008,
+        ]);
+    }
+
+    public function testFetchWorkflowJobsWithSkippedJob(): void
+    {
+        $this->user->organizations()->attach($this->repository->organization_id, ["is_admin" => true]);
+
+        $mockClient = new MockClient([
+            GetWorkflowJobsRequest::class => MockResponse::make([
+                "jobs" => [
+                    [
+                        "id" => 123,
+                        "name" => "job1",
+                        "started_at" => "2024-06-19T08:25:09Z",
+                        "completed_at" => "2024-06-19T08:26:09Z",
+                        "conclusion" => "skipped",
                         "labels" => [
                             "ubuntu-latest",
                         ],
@@ -142,6 +193,7 @@ class FetchWorkflowJobsTest extends TestCase
                         "name" => "job1",
                         "started_at" => "2024-06-19T08:25:09Z",
                         "completed_at" => "2024-06-19T08:26:09Z",
+                        "conclusion" => "success",
                         "labels" => [
                             "ubuntu-latest",
                         ],
@@ -178,6 +230,7 @@ class FetchWorkflowJobsTest extends TestCase
                         "name" => "job1",
                         "started_at" => "2024-06-19T08:25:09Z",
                         "completed_at" => "2024-06-19T08:26:09Z",
+                        "conclusion" => "success",
                         "labels" => [
                             "ubuntu-latest",
                         ],

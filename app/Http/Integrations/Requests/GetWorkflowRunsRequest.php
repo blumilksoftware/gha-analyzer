@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Integrations\Requests;
 
 use App\DTO\RepositoryDTO;
+use App\DTO\WorkflowActorDTO;
 use App\DTO\WorkflowRunDTO;
 use App\Models\Organization;
 use App\Models\Repository;
@@ -46,6 +47,7 @@ class GetWorkflowRunsRequest extends Request
                     name: $data["name"],
                     repositoryId: $repository->id,
                     createdAt: new DateTime($data["created_at"]),
+                    actor: WorkflowActorDTO::createFromArray($data["actor"]),
                 ));
             }
         }
