@@ -26,4 +26,35 @@ return [
     "organization" => [
         "type" => "Organization",
     ],
+    "runners" => [
+        "os" => ["ubuntu", "windows", "macos"],
+        "multiplier" => [
+            "ubuntu" => 1,
+            "windows" => 2,
+            "macos" => 10,
+        ],
+        "pricing" => [
+            "ubuntu" => [
+                "standard" => 0.008,
+                "4" => 0.016,
+                "8" => 0.032,
+                "16" => 0.064,
+                "32" => 0.128,
+                "64" => 0.256,
+            ],
+            "windows" => [
+                "standard" => 0.016,
+                "4" => 0.032,
+                "8" => 0.064,
+                "16" => 0.128,
+                "32" => 0.256,
+                "64" => 0.512,
+            ],
+            "macos" => [
+                "standard" => 0.08,
+                "12" => 0.12,
+            ],
+        ],
+    ],
+    "rate_limit" => 5000,
 ];
