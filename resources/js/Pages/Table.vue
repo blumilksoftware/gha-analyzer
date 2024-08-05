@@ -1,133 +1,46 @@
-<script setup>
-import Papa from 'papaparse'
+<script setup lang="ts">
 import moment from 'moment'
-import { computed, ref, watch } from 'vue'
-import { useLogsStore } from '@/Stores/logsStore'
-import { Head } from '@inertiajs/vue3'
+import {computed, defineProps} from 'vue'
+import {Head} from '@inertiajs/vue3'
+import Repository from '@/Components/Repository.vue'
+import { withSort } from '@/Utils/sort'
 
-const logsStore = useLogsStore()
-const logs = computed(() => logsStore.getLogs)
-
-const props = defineProps({
-  colors: {
-    type: Array,
-    default: () => [],
-  },
-})
-var colors = props.colors
-
-const tables = ref({
-  logs: {
-    items: [],
-    sort: 'date',
-    order: 'asc',
-  },
-})
-
-const dictionaries = ref({
-  authors: {},
-  repositories: {},
-})
-
-function parseLineToLog(line) {
-  const repository = {
-    slug: line[7] + '/' + line[8],
-    name: line[8],
-    namespace: line[7] ? line[7] : 'unknown',
-    color: colors[Object.keys(dictionaries.value.repositories).length % colors.length],
-  }
-
-  if (!dictionaries.value.repositories[repository.name]) {
-    dictionaries.value.repositories[repository.name] = repository
-    dictionaries.value.repositories = JSON.parse(JSON.stringify(dictionaries.value.repositories))
-  } else {
-    repository.color = dictionaries.value.repositories[repository.name].color
-  }
-
-  let author = line[9]
-  if (author === 'dependabot[bot]') {
-    author = 'dependabot'
-  }
-
-  if (!dictionaries.value.authors[author]) {
-    dictionaries.value.authors[author] = author
-    dictionaries.value.authors = JSON.parse(JSON.stringify(dictionaries.value.authors))
-  }
-
-  return {
-    date: line[0],
-    dateForHumans: moment(line[0]).fromNow(),
-    product: line[1],
-    repository: repository,
-    slug: repository.slug,
-    quantity: parseInt(line[3]),
-    unit: line[2].replace('Compute - ', '').toLowerCase(),
-    price: line[5],
-    total: (line[3] * line[5]).toFixed(3),
-    author: author,
-    workflow: line[10],
-    notes: line[11],
+interface WorkflowRun {
+  id: number
+  date: number
+  organization: string
+  repository: string
+  repository_id: number
+  minutes: number
+  price_per_minute: number
+  total_price: number
+  workflow: string
+  os: string
+  actor: {
+    id: number
+    name: string
+    github_id: number
+    avatar_url: string
   }
 }
 
-function filterLogsBy(tag) {
-  if (tables.value.logs.sort === tag) {
-    tables.value.logs.order = tables.value.logs.order === 'desc' ? 'asc' : 'desc'
-  } else {
-    tables.value.logs.sort = tag
-    tables.value.logs.order = 'desc'
-  }
-}
+const props = defineProps<{
+  data: WorkflowRun[]
+}>()
 
-function getUnitLogo(unit) {
-  return new URL(`../../assets/images/units/${unit}.png`, import.meta.url).href
-}
-
-const sortedLogs = computed(() => {
-  let data = [...tables.value.logs.items]
-
-  if (tables.value.logs.sort) {
-    data = data.sort((a, b) => {
-      if (typeof a[tables.value.logs.sort] === 'number' && typeof b[tables.value.logs.sort] === 'number') {
-        return a[tables.value.logs.sort] - b[tables.value.logs.sort]
-      }
-      return a[tables.value.logs.sort] > b[tables.value.logs.sort] ? 1 : -1
-    })
-  }
-
-  if (tables.value.logs.order === 'desc') {
-    data = data.reverse()
-  }
-
-  return data
-})
-
-const logsWithIcons = computed(() => {
-  return sortedLogs.value.map(log => ({
-    ...log,
-    unitLogo: getUnitLogo(log.unit),
-  }))
-})
+const { data, sorted, filterBy } = withSort(props.data, 'id')
 
 const totalQuantity = computed(() => {
-  return tables.value.logs.items.reduce((a, b) => a + parseInt(b.quantity), 0)
+  return data.value.items.reduce((a, b) => a + b.minutes, 0)
 })
 
 const totalPrice = computed(() => {
-  return tables.value.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
+  return data.value.items.reduce((a, b) => a + b.total_price, 0).toFixed(3)
 })
 
-function parseLogs() {
-  const data = Papa.parse(logs.value, { header: false })
-  const parsedData = data.data
-
-  const parsed = parsedData.slice(1, -1).map((line) => parseLineToLog(line))
-  tables.value.logs.items = parsed
+function getOSLogo(os: string) {
+  return new URL(`../../assets/images/units/${os}.png`, import.meta.url).href
 }
-
-watch(logs, () => {
-  parseLogs()
-}, { immediate: true })
 
 </script>
 
@@ -135,58 +48,50 @@ watch(logs, () => {
   <Head>
     <title>Table</title>
   </Head>
-  <table v-if="logsWithIcons.length > 0" class="w-full border-collapse border table-auto mt-4 text-sm">
+  <table v-if="sorted.length > 0" class="w-full border-collapse border table-auto mt-4 text-sm">
     <thead>
       <tr class="text-left">
-        <th class="border p-2 cursor-pointer" @click="filterLogsBy('date')">Date</th>
-        <th class="border p-2 cursor-pointer" @click="filterLogsBy('slug')">Repository</th>
-        <th class="border p-2 cursor-pointer" @click="filterLogsBy('quantity')">Quantity</th>
-        <th class="border p-2 cursor-pointer" @click="filterLogsBy('total')">Price</th>
-        <th class="border p-2 w-px">Unit</th>
-        <th class="border p-2 cursor-pointer" @click="filterLogsBy('author')">Author</th>
-        <th class="border p-2">Actions workflow file</th>
+        <th class="border p-2 cursor-pointer" @click="filterBy('date')">Date</th>
+        <th class="border p-2 cursor-pointer" @click="filterBy('repository')">Repository</th>
+        <th class="border p-2 cursor-pointer" @click="filterBy('minutes')">Quantity</th>
+        <th class="border p-2 cursor-pointer" @click="filterBy('total_price')">Price</th>
+        <th class="border p-2 w-px cursor-pointer" @click="filterBy('os')">Unit</th>
+        <th class="border p-2 cursor-pointer" @click="filterBy('organization')">Author</th>
+        <th class="border p-2 cursor-pointer" @click="filterBy('workflow')">Actions workflow file</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="log in logsWithIcons" :key="log">
+      <tr v-for="run in sorted" :key="run.id">
         <td class="border p-2">
-          {{ log.date }}
+          {{ run.date }}
           <div class="text-gray-500 text-xs">
-            {{ log.dateForHumans }}
+            {{ moment(run.date).fromNow() }}
           </div>
         </td>
         <td class="border p-2">
-          <div class="text-gray-500 text-xs">
-            {{ log.repository.namespace }}
-          </div>
-          <div class="relative flex items-center py-0.5 text-sm">
-            <span class="absolute shrink-0 flex items-center justify-center">
-              <span class="size-3 rounded-full" :class="log.repository.color" />
-            </span>
-            <span class="ml-5 text-gray-900">{{ log.repository.name }}</span>
-          </div>
+          <Repository :id="run.repository_id" :name="run.repository" :organization="run.organization" />
         </td>
-        <td class="border p-2">{{ log.quantity }}</td>
+        <td class="border p-2">{{ run.minutes }}</td>
         <td class="border p-2">
           <div class="text-gray-500 text-xs">
-            {{ log.quantity }} &times; {{ log.price }}
+            {{ run.minutes }} &times; {{ run.price_per_minute }}
           </div>
-          ${{ log.total }}
+          ${{ run.total_price }}
         </td>
         <td class="border p-2">
-          <img :src="log.unitLogo" :alt="log.unit" :title="log.unit" class="w-8">
+          <img :src="getOSLogo(run.os)" :alt="run.os" :title="run.os" class="w-8">
         </td>
         <td class="border p-2">
-          <a v-if="log.author" :href="'https://github.com/' + log.author" class="flex items-center" target="_blank">
-            <img :src="'https://github.com/' + log.author + '.png'" class="size-6 rounded-full mr-2" :alt="log.author">
-            {{ log.author }}
+          <a v-if="run.actor" :href="'https://github.com/' + run.actor.name" class="flex items-center" target="_blank">
+            <img :src="run.actor.avatar_url" class="size-6 rounded-full mr-2" :alt="run.actor.name">
+            {{ run.actor.name }}
           </a>
           <span v-else>
             unknown
           </span>
         </td>
         <td class="border p-2">
-          {{ log.workflow.replace('.github/workflows/', '') }}
+          {{ run.workflow }}
         </td>
       </tr>
       <tr>

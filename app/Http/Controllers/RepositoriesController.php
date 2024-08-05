@@ -4,30 +4,40 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\ColorsService;
+use App\Models\Repository;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class RepositoriesController extends Controller
 {
-    protected array $colors;
+    public function __construct() {}
 
-    public function __construct(
-        protected ColorsService $colorsService,
-    ) {
-        $this->colors = [];
-    }
-
-    public function show()
+    public function show(): Response
     {
-        $this->colors = $this->getColors();
+        $repositories = Repository::with("workflowRuns.workflowJobs")->with("organization")->get();
+        $data = [];
 
-        return Inertia::render("Repositories", [
-            "colors" => $this->colors,
-        ]);
-    }
+        foreach ($repositories as $repo) {
+            $price = 0;
+            $minutes = 0;
 
-    private function getColors()
-    {
-        return $this->colorsService->getColors();
+            foreach ($repo->workflowRuns as $run) {
+                foreach ($run->workflowJobs as $job) {
+                    $minutes += $job->minutes;
+                    $price += $job->minutes * $job->price_per_unit;
+                }
+            }
+
+            $data[] = [
+                "id" => $repo->id,
+                "name" => $repo->name,
+                "organization" => $repo->organization->name,
+                "avatar_url" => $repo->organization->avatar_url,
+                "minutes" => $minutes,
+                "price" => $price,
+            ];
+        }
+
+        return Inertia::render("Repositories", ["data" => $data]);
     }
 }

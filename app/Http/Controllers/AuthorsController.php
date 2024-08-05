@@ -4,30 +4,42 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\ColorsService;
+use App\Models\WorkflowActor;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class AuthorsController extends Controller
 {
-    protected array $colors;
+    public function __construct() {}
 
-    public function __construct(
-        protected ColorsService $colorsService,
-    ) {
-        $this->colors = [];
-    }
-
-    public function show()
+    public function show(): Response
     {
-        $this->colors = $this->getColors();
+        $actors = WorkflowActor::with("workflowRuns.workflowJobs")->get();
+        $data = [];
+
+        foreach ($actors as $actor) {
+            $price = 0;
+            $minutes = 0;
+
+            foreach ($actor->workflowRuns as $run) {
+                foreach ($run->workflowJobs as $job) {
+                    $minutes += $job->minutes;
+                    $price += $job->minutes * $job->price_per_unit;
+                }
+            }
+
+            $data[] = [
+                "id" => $actor->id,
+                "name" => $actor->name,
+                "github_id" => $actor->github_id,
+                "avatar_url" => $actor->avatar_url,
+                "minutes" => $minutes,
+                "price" => $price,
+            ];
+        }
 
         return Inertia::render("Authors", [
-            "colors" => $this->colors,
+            "data" => $data,
         ]);
-    }
-
-    private function getColors()
-    {
-        return $this->colorsService->getColors();
     }
 }

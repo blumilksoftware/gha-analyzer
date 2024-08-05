@@ -1,124 +1,31 @@
-<script setup>
-import Papa from 'papaparse'
-import moment from 'moment'
-import { computed, ref, watch } from 'vue'
-import { useLogsStore } from '@/Stores/logsStore'
+<script setup lang="ts">
+import { computed } from 'vue'
 import { Head } from '@inertiajs/vue3'
+import Repository from '@/Components/Repository.vue'
+import { withSort } from '@/Utils/sort'
 
-const props = defineProps({
-  colors: {
-    type: Array,
-    default: () => [],
-  },
-})
-
-var colors = props.colors
-
-const logsStore = useLogsStore()
-const logs = computed(() => logsStore.getLogs)
-
-var tables = ref({
-  logs: {
-    items: [],
-    sort: 'date',
-    order: 'asc',
-  },      
-})
-var dictionaries = ref({
-  authors: {},
-  repositories: {},
-})
-
-function parseLineToLog (line) {
-  const repository = {
-    slug: line[7] + '/' + line[8],
-    name: line[8],
-    namespace: line[7] ? line[7] : 'unknown',
-    color: colors[(repositories.value.length % colors.length)],
-  }
-
-  if (!dictionaries.value.repositories[repository.name]) {
-    dictionaries.value.repositories[repository.name] = repository
-    dictionaries.value.repositories = JSON.parse(JSON.stringify(dictionaries.value.repositories))
-  } else {
-    repository.color = dictionaries.value.repositories[repository.name].color
-  }
-
-  let author = line[9]
-  if (author === 'dependabot[bot]') {
-    author = 'dependabot'
-  }
-
-  if (dictionaries.value.authors[author]) {
-    dictionaries.value.authors[author] = author
-    dictionaries.value.authors = JSON.parse(JSON.stringify(dictionaries.value.authors))
-  }
-
-  return {
-    date: line[0],
-    dateForHumans: moment(line[0]).fromNow(),
-    product: line[1],
-    repository: repository,
-    slug: repository.slug,
-    quantity: parseInt(line[3]),
-    unit: line[2].replace('Compute - ', '').toLowerCase(),
-    price: line[5],
-    total: (line[3] * line[5]).toFixed(3),
-    author: author,
-    workflow: line[10],
-    notes: line[11],
-  }
+interface RepositoryData {
+  id: number
+  name: string
+  organization: string
+  avatar_url: string
+  minutes: number
+  price: number
 }
 
-function quantityPerRepository (repository) {
-  return tables.value.logs.items.filter(log => log.repository.name === repository.name).reduce((a, b) => a + parseInt(b.quantity), 0)
-}
-function pricePerRepository (repository) {
-  return tables.value.logs.items.filter(log => log.repository.name === repository.name).reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
-}
-const sortedLogs = computed(() => {
-  let data = tables.value.logs.items
+const props = defineProps<{
+  data: RepositoryData[]
+}>()
 
-  if (tables.value.logs.sort) {
-    data = data.sort((a, b) => {
-      if (!isNaN(a[tables.value.logs.sort]) && !isNaN(b[tables.value.logs.sort])) {
-        return a[tables.value.logs.sort] > b[tables.value.logs.sort] ? 1 : -1
-      }
-
-      return b[tables.value.logs.sort] > a[tables.value.logs.sort] ? 1 : -1
-    })
-  }
-
-  if (tables.value.logs.order === 'desc') {
-    data = data.reverse()
-  }
-
-  return data
-})
-
-const repositories = computed(() => {
-  return Object.values(dictionaries.value.repositories).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
-})
+const { data, sorted, filterBy } = withSort(props.data, 'id')
 
 const totalQuantity = computed(() => {
-  return tables.value.logs.items.reduce((a, b) => a + parseInt(b.quantity), 0)
+  return data.value.items.reduce((a, b) => a + b.minutes, 0)
 })
 
 const totalPrice = computed(() => {
-  return tables.value.logs.items.reduce((a, b) => a + parseFloat(b.total), 0).toFixed(3)
+  return data.value.items.reduce((a, b) => a + b.price, 0)
 })
-
-watch(logs, () => {
-  parseLogs()
-}, { immediate: true })
-
-async function parseLogs(){
-  const data = Papa.parse(logs.value)
-  const parsedData = data.data
-
-  var parsed = parsedData.slice(1,-1).map((line) => parseLineToLog(line))
-  tables.value.logs.items = parsed 
-}
 
 </script>
 
@@ -126,33 +33,26 @@ async function parseLogs(){
   <Head>
     <title>Repositories</title>
   </Head>
-  <table v-if="sortedLogs.length > 0" class="w-full border-collapse border table-fixed mt-4 text-sm">
+
+  <table v-if="sorted.length > 0" class="w-full border-collapse border table-fixed mt-4 text-sm">
     <thead>
       <tr class="text-left">
-        <th class="w-1/2 border p-2">Repository</th>
-        <th class="border p-2">Quantity</th>
-        <th class="border p-2 text-gray-500 font-normal">Quantity per cent</th>
-        <th class="border p-2">Total price</th>
-        <th class="border p-2 text-gray-500 font-normal">Price per cent</th>
+        <th class="w-1/2 border p-2 cursor-pointer" @click="filterBy('name')">Repository</th>
+        <th class="border p-2 cursor-pointer" @click="filterBy('minutes')">Quantity</th>
+        <th class="border p-2 text-gray-500 font-normal cursor-pointer" @click="filterBy('minutes')">Quantity per cent</th>
+        <th class="border p-2 cursor-pointer" @click="filterBy('price')">Total price</th>
+        <th class="border p-2 text-gray-500 font-normal cursor-pointer" @click="filterBy('price')">Price per cent</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="repository in repositories" :key="repository">
+      <tr v-for="repository in sorted" :key="repository.id">
         <td class="border p-2">
-          <div class="text-gray-500 text-xs">
-            {{ repository.namespace }}
-          </div>
-          <div class="relative flex items-center py-0.5 text-sm">
-            <span class="absolute shrink-0 flex items-center justify-center">
-              <span class="size-3 rounded-full" :class="repository.color" />
-            </span>
-            <span class="ml-5 text-gray-900">{{ repository.name }}</span>
-          </div>
+          <Repository :id="repository.id" :name="repository.name" :organization="repository.organization" />
         </td>
-        <td class="border p-2">{{ quantityPerRepository(repository) }}</td>
-        <td class="border p-2 text-gray-500">{{ (quantityPerRepository(repository) * 100 / totalQuantity).toFixed(2) }}%</td>
-        <td class="border p-2">${{ pricePerRepository(repository) }}</td>
-        <td class="border p-2 text-gray-500">{{ (pricePerRepository(repository) * 100 / totalPrice).toFixed(2) }}%</td>
+        <td class="border p-2">{{ repository.minutes.toFixed(2) }}</td>
+        <td class="border p-2 text-gray-500">{{ (repository.minutes * 100 / totalQuantity).toFixed(2) }}%</td>
+        <td class="border p-2">${{ repository.price.toFixed(2) }}</td>
+        <td class="border p-2 text-gray-500">{{ (repository.price * 100 / totalPrice).toFixed(2) }}%</td>
       </tr>
     </tbody>
   </table>
