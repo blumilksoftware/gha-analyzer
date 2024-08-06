@@ -29,11 +29,11 @@ jobs:
           restore-keys: ${{ runner.os }}-npm-dependencies
 
       - name: Set up node
-        uses: actions/setup-node@v4.0.2 # https://github.com/actions/setup-node
+        uses: actions/setup-node@v4.0.3 # https://github.com/actions/setup-node
         with:
           node-version: 21
 
-      - name: Instal npm dependencies
+      - name: Install npm dependencies
         run: npm clean-install
 
       - name: Run JS linter
