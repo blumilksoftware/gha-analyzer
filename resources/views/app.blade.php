@@ -6,8 +6,8 @@
     @vite('resources/js/app.ts')
     @inertiaHead
 </head>
-<body class="h-full bg-gradient-to-r from-white to-blue-400">
-    <div class="container py-4 mx-auto">
+<body class="bg-gradient-to-r from-white to-blue-400">
+    <div class="h-full container py-4 mx-auto">
         @inertia
     </div>
 </body>
