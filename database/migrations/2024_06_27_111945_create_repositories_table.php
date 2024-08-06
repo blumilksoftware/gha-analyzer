@@ -9,18 +9,19 @@ use Illuminate\Support\Facades\Schema;
 return new class() extends Migration {
     public function up(): void
     {
-        Schema::create("user_organization", function (Blueprint $table): void {
+        Schema::create("repositories", function (Blueprint $table): void {
             $table->id();
-            $table->bigInteger("user_id");
+            $table->bigInteger("github_id");
+            $table->string("name");
             $table->bigInteger("organization_id");
-            $table->boolean("is_admin")->default(false);
-            $table->foreign("user_id")->references("id")->on("users")->onDelete("cascade");
+            $table->boolean("is_private");
+            $table->timestamps();
             $table->foreign("organization_id")->references("id")->on("organizations")->onDelete("cascade");
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists("user_organization");
+        Schema::dropIfExists("repositories");
     }
 };
