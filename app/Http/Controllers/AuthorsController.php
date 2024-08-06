@@ -14,18 +14,16 @@ class AuthorsController extends Controller
 
     public function show(): Response
     {
-        $actors = WorkflowActor::with("workflowRuns.workflowJobs")->get();
+        $actors = WorkflowActor::with("workflowJobs")->get();
         $data = [];
 
         foreach ($actors as $actor) {
             $price = 0;
             $minutes = 0;
 
-            foreach ($actor->workflowRuns as $run) {
-                foreach ($run->workflowJobs as $job) {
-                    $minutes += $job->minutes;
-                    $price += $job->minutes * $job->price_per_unit;
-                }
+            foreach ($actor->workflowJobs as $job) {
+                $minutes += $job->minutes;
+                $price += $job->minutes * $job->price_per_unit;
             }
 
             $data[] = [

@@ -14,18 +14,16 @@ class RepositoriesController extends Controller
 
     public function show(): Response
     {
-        $repositories = Repository::with("workflowRuns.workflowJobs")->with("organization")->get();
+        $repositories = Repository::with("workflowJobs")->with("organization")->get();
         $data = [];
 
         foreach ($repositories as $repo) {
             $price = 0;
             $minutes = 0;
 
-            foreach ($repo->workflowRuns as $run) {
-                foreach ($run->workflowJobs as $job) {
-                    $minutes += $job->minutes;
-                    $price += $job->minutes * $job->price_per_unit;
-                }
+            foreach ($repo->workflowJobs as $job) {
+                $minutes += $job->minutes;
+                $price += $job->minutes * $job->price_per_unit;
             }
 
             $data[] = [

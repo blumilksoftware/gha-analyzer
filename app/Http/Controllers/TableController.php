@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Organization;
+use App\Models\WorkflowJob;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,29 +14,23 @@ class TableController extends Controller
 
     public function show(): Response
     {
-        $organizations = Organization::with("repositories.workflowRuns.workflowJobs")->with("repositories.workflowRuns.workflowActor")->get();
+        $jobs = WorkflowJob::with("workflowRun.repository.organization")->with("workflowRun.workflowActor")->get();
         $data = [];
 
-        foreach ($organizations as $org) {
-            foreach ($org->repositories as $repo) {
-                foreach ($repo->workflowRuns as $run) {
-                    foreach ($run->workflowJobs as $job) {
-                        $data[] = [
-                            "id" => $run->job,
-                            "date" => $run->github_created_at,
-                            "organization" => $org->name,
-                            "repository" => $repo->name,
-                            "repository_id" => $repo->id,
-                            "minutes" => $job->minutes,
-                            "price_per_minute" => $job->price_per_unit,
-                            "total_price" => $job->minutes * $job->price_per_unit,
-                            "workflow" => $run->name . " - " . $job->name,
-                            "os" => $job->runner_os,
-                            "actor" => $run->workflowActor,
-                        ];
-                    }
-                }
-            }
+        foreach ($jobs as $job) {
+            $data[] = [
+                "id" => $job->workflowRun->id,
+                "date" => $job->workflowRun->github_created_at,
+                "organization" => $job->workflowRun->repository->organization->name,
+                "repository" => $job->workflowRun->repository->name,
+                "repository_id" => $job->workflowRun->repository->id,
+                "minutes" => $job->minutes,
+                "price_per_minute" => $job->price_per_unit,
+                "total_price" => $job->minutes * $job->price_per_unit,
+                "workflow" => $job->name . " - " . $job->name,
+                "os" => $job->runner_os,
+                "actor" => $job->workflowRun->workflowActor,
+            ];
         }
 
         return Inertia::render("Table", [

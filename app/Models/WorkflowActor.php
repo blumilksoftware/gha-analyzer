@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @property int $id
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon $updated_at
  *
  * @property Collection<WorkflowRun> $workflowRuns
+ * @property Collection<WorkflowJob> $workflowJobs
  */
 class WorkflowActor extends Model
 {
@@ -33,5 +35,10 @@ class WorkflowActor extends Model
     public function workflowRuns(): HasMany
     {
         return $this->hasMany(WorkflowRun::class);
+    }
+
+    public function workflowJobs(): HasManyThrough
+    {
+        return $this->HasManyThrough(WorkflowJob::class, WorkflowRun::class);
     }
 }

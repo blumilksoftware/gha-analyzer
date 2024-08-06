@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @property int $id
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property Organization $organization
  * @property Collection<WorkflowRun> $workflowRuns
+ * @property Collection<WorkflowJob> $workflowJobs
  */
 class Repository extends Model
 {
@@ -37,6 +39,11 @@ class Repository extends Model
     public function workflowRuns(): HasMany
     {
         return $this->HasMany(WorkflowRun::class);
+    }
+
+    public function workflowJobs(): HasManyThrough
+    {
+        return $this->HasManyThrough(WorkflowJob::class, WorkflowRun::class);
     }
 
     public function organization(): BelongsTo
