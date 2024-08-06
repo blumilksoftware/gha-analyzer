@@ -13,7 +13,6 @@ export default {
         extend: {
 
         },
-
     },
     plugins: [],
 }
