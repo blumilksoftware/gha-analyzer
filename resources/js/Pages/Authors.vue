@@ -3,15 +3,7 @@ import { computed } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import SortableTable from '@/Components/SortableTable.vue'
 import Github from '@/Components/Github.vue'
-
-interface Author {
-  id: number
-  name: string
-  github_id: number
-  avatar_url: string
-  minutes: number
-  price: number
-}
+import type {Author} from '@/Types/Author'
 
 const props = defineProps<{
   data: Author[]

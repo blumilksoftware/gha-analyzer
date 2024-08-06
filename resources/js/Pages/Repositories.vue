@@ -3,15 +3,7 @@ import { computed } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import Repository from '@/Components/Repository.vue'
 import SortableTable from '@/Components/SortableTable.vue'
-
-interface RepositoryData {
-  id: number
-  name: string
-  organization: string
-  avatar_url: string
-  minutes: number
-  price: number
-}
+import { type Repository as RepositoryData } from '@/Types/Repository'
 
 const props = defineProps<{
   data: RepositoryData[]
