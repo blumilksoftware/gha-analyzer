@@ -26,8 +26,8 @@ class TableController extends Controller
                 "repository_id" => $job->workflowRun->repository->id,
                 "minutes" => $job->minutes,
                 "price_per_minute" => $job->price_per_unit,
-                "total_price" => $job->minutes * $job->price_per_unit,
-                "workflow" => $job->name . " - " . $job->name,
+                "total_price" => $job->price,
+                "workflow" => $job->fullName,
                 "os" => $job->runner_os,
                 "actor" => $job->workflowRun->workflowActor,
             ];
