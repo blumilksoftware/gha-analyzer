@@ -1,3 +1,5 @@
+import type {Actor} from '@/Types/Actor'
+
 export interface WorkflowRun {
   id: number
   date: number
@@ -9,10 +11,5 @@ export interface WorkflowRun {
   total_price: number
   workflow: string
   os: string
-  actor: {
-    id: number
-    name: string
-    github_id: number
-    avatar_url: string
-  }
+  actor: Actor
 }
