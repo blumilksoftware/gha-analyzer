@@ -5,7 +5,7 @@ FROM composer/composer:2.7.7-bin AS composer-bin
 FROM node:22.5.1-bullseye-slim AS node
 
 # For other versions check: https://hub.docker.com/_/php/tags?page=1&name=fpm-bullseye
-FROM php:8.3.9-fpm-bullseye
+FROM php:8.3.10-fpm-bullseye
 
 COPY --from=composer-bin ./composer /usr/bin/composer
 
