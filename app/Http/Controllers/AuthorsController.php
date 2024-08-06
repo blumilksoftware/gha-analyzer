@@ -18,21 +18,13 @@ class AuthorsController extends Controller
         $data = [];
 
         foreach ($actors as $actor) {
-            $price = 0;
-            $minutes = 0;
-
-            foreach ($actor->workflowJobs as $job) {
-                $minutes += $job->minutes;
-                $price += $job->minutes * $job->price_per_unit;
-            }
-
             $data[] = [
                 "id" => $actor->id,
                 "name" => $actor->name,
                 "github_id" => $actor->github_id,
                 "avatar_url" => $actor->avatar_url,
-                "minutes" => $minutes,
-                "price" => $price,
+                "minutes" => $actor->totalMinutes,
+                "price" => $actor->totalPrice,
             ];
         }
 

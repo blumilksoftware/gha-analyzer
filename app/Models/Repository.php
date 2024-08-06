@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,9 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property boolean $is_private
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @property float $totalMinutes
+ * @property float $totalPrice
  *
  * @property Organization $organization
  * @property Collection<WorkflowRun> $workflowRuns
@@ -49,5 +53,15 @@ class Repository extends Model
     public function organization(): BelongsTo
     {
         return $this->BelongsTo(Organization::class);
+    }
+
+    protected function totalMinutes(): Attribute
+    {
+        return Attribute::get(fn() => $this->workflowJobs->sum("minutes"));
+    }
+
+    protected function totalPrice(): Attribute
+    {
+        return Attribute::get(fn() => $this->workflowJobs->sum("price"));
     }
 }

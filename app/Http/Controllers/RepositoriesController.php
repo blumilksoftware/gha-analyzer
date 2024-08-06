@@ -18,21 +18,13 @@ class RepositoriesController extends Controller
         $data = [];
 
         foreach ($repositories as $repo) {
-            $price = 0;
-            $minutes = 0;
-
-            foreach ($repo->workflowJobs as $job) {
-                $minutes += $job->minutes;
-                $price += $job->minutes * $job->price_per_unit;
-            }
-
             $data[] = [
                 "id" => $repo->id,
                 "name" => $repo->name,
                 "organization" => $repo->organization->name,
                 "avatar_url" => $repo->organization->avatar_url,
-                "minutes" => $minutes,
-                "price" => $price,
+                "minutes" => $repo->totalMinutes,
+                "price" => $repo->totalPrice,
             ];
         }
 
