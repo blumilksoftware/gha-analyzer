@@ -6,10 +6,10 @@ interface Sortable<T> {
   order: 'asc' | 'desc'
 }
 
-export const withSort = <T>(items: T[], sortBy: keyof T) => {
+export const withSort = <T>(items: T[], sortByKey: keyof T) => {
   const data = ref({
     items,
-    sort: sortBy,
+    sort: sortByKey,
     order: 'desc',
   }) as Ref<Sortable<T>>
 
@@ -46,7 +46,7 @@ export const withSort = <T>(items: T[], sortBy: keyof T) => {
     return items
   })
 
-  const filterBy = (tag: keyof T) => {
+  const sortBy = (tag: keyof T) => {
     if (data.value.sort === tag) {
       data.value.order = data.value.order === 'desc' ? 'asc' : 'desc'
     }
@@ -56,5 +56,5 @@ export const withSort = <T>(items: T[], sortBy: keyof T) => {
     }
   }
 
-  return { sorted, data, filterBy }
+  return { sorted, data, sortBy }
 }
