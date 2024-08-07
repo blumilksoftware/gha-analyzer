@@ -18,7 +18,7 @@ function getNavigationClass (tab: string) {
         <span class="pr-6 py-2 font-medium text-sm rounded-md">
           <img src="../../assets/images/icon.png" alt="Logo" class="w-12">
         </span>
-        <div class="flex space-x-4" style="width: 100%;">
+        <div class="flex space-x-4 w-full">
           <Link href="/table"><span :class="getNavigationClass('/table')" class="cursor-pointer px-8 py-4 text-xs rounded-md bg-blue-400/50 hover:bg-blue-400/75">Table</span></Link>
           <Link href="/repositories"><span :class="getNavigationClass('/repositories')" class="cursor-pointer px-8 py-4 text-xs rounded-md bg-blue-400/50 hover:bg-blue-400/75">Repositories</span></Link>
           <Link href="/authors"><span :class="getNavigationClass('/authors')" class="cursor-pointer px-8 py-4 text-xs rounded-md bg-blue-400/50 hover:bg-blue-400/75">Authors</span></Link>
