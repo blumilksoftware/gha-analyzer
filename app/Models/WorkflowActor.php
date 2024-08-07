@@ -48,11 +48,11 @@ class WorkflowActor extends Model
 
     protected function totalMinutes(): Attribute
     {
-        return Attribute::get(fn() => $this->workflowJobs->sum("minutes"));
+        return Attribute::get(fn(): float => $this->workflowJobs->sum("minutes"));
     }
 
     protected function totalPrice(): Attribute
     {
-        return Attribute::get(fn() => $this->workflowJobs->sum("price"));
+        return Attribute::get(fn(): float => $this->workflowJobs->sum("price"));
     }
 }

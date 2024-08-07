@@ -50,11 +50,11 @@ class WorkflowJob extends Model
 
     protected function price(): Attribute
     {
-        return Attribute::get(fn() => $this->minutes * $this->price_per_unit);
+        return Attribute::get(fn(): float => $this->minutes * $this->price_per_unit);
     }
 
     protected function fullName(): Attribute
     {
-        return Attribute::get(fn() => $this->workflowRun->name . " - " . $this->name);
+        return Attribute::get(fn(): string => $this->workflowRun->name . " - " . $this->name);
     }
 }
