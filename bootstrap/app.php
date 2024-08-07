@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
-// const HTTP_SESSION_EXPIRED = 419;
+const HTTP_SESSION_EXPIRED = 419;
 const HANDLED_ERROR_CODES = [
     Response::HTTP_FORBIDDEN,
     Response::HTTP_INTERNAL_SERVER_ERROR,
