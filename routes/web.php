@@ -8,12 +8,16 @@ use App\Http\Controllers\RepositoriesController;
 use App\Http\Controllers\TableController;
 use Illuminate\Support\Facades\Route;
 
+
 Route::middleware("auth")->group(function (): void {
     Route::get("/table", [TableController::class, "show"]);
     Route::get("/repositories", [RepositoriesController::class, "show"]);
     Route::get("/authors", [AuthorsController::class, "show"]);
+    Route::get("/auth/logout", [GithubController::class, "logout"])->name("logout");
+
 
     Route::get("/{organizationId}/fetch", [GithubController::class, "fetchData"])->middleware("auth");
+    
 });
 
 Route::redirect("/", "table");

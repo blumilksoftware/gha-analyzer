@@ -80,4 +80,10 @@ class GithubController extends Controller
     {
         return Inertia::render("Login");
     }
+
+    public function logout(): RedirectResponse
+    {
+        Auth::logout();
+        return redirect("/auth/login");
+    }
 }
