@@ -84,6 +84,7 @@ class GithubController extends Controller
     public function logout(): RedirectResponse
     {
         Auth::logout();
+
         return redirect("/auth/login");
     }
 }
