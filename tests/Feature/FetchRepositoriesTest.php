@@ -47,33 +47,6 @@ class FetchRepositoriesTest extends TestCase
         MockClient::destroyGlobal();
     }
 
-    public function testfetchRepositoriesWithAdminUser(): void
-    {
-        $this->user->organizations()->attach($this->organization->id, ["is_admin" => true]);
-
-        $mockClient = new MockClient([
-            GetRepositoriesRequest::class => MockResponse::make([[
-                "id" => 123,
-                "name" => "repo",
-                "owner" => [
-                    "id" => $this->organization->id,
-                ],
-                "private" => true,
-            ]], 200),
-        ]);
-
-        $this->githubConnector->withMockClient($mockClient);
-
-        $this->fetchRepositoriesService->fetchRepositories($this->organizationDto, $this->user->id);
-
-        $this->assertDatabaseHas("repositories", [
-            "github_id" => 123,
-            "name" => "repo",
-            "organization_id" => $this->organization->id,
-            "is_private" => true,
-        ]);
-    }
-
     public function testfetchRepositoriesWithMemberUser(): void
     {
         $this->user->organizations()->attach($this->organization->id);
@@ -91,11 +64,9 @@ class FetchRepositoriesTest extends TestCase
 
         $this->githubConnector->withMockClient($mockClient);
 
-        $this->expectException(UnauthorizedException::class);
-
         $this->fetchRepositoriesService->fetchRepositories($this->organizationDto, $this->user->id);
 
-        $this->assertDatabaseMissing("repositories", [
+        $this->assertDatabaseHas("repositories", [
             "github_id" => 123,
             "name" => "repo",
             "organization_id" => $this->organization->id,

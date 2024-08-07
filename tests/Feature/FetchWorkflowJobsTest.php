@@ -67,9 +67,9 @@ class FetchWorkflowJobsTest extends TestCase
         MockClient::destroyGlobal();
     }
 
-    public function testFetchWorkflowJobsWithAdminUser(): void
+    public function testFetchWorkflowJobsWithMemberUser(): void
     {
-        $this->user->organizations()->attach($this->repository->organization_id, ["is_admin" => true]);
+        $this->user->organizations()->attach($this->repository->organization_id);
 
         $mockClient = new MockClient([
             GetWorkflowJobsRequest::class => MockResponse::make([
@@ -166,45 +166,6 @@ class FetchWorkflowJobsTest extends TestCase
         ]);
 
         $this->githubConnector->withMockClient($mockClient);
-
-        $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto, $this->user->id);
-
-        $this->assertDatabaseMissing("workflow_jobs", [
-            "github_id" => 123,
-            "name" => "job1",
-            "workflow_run_id" => $this->workflowRun->id,
-            "runner_os" => "ubuntu",
-            "runner_type" => "standard",
-            "minutes" => 1,
-            "multiplier" => 1,
-            "price_per_unit" => 0.008,
-        ]);
-    }
-
-    public function testFetchWorkflowJobsWithMemberUser(): void
-    {
-        $this->user->organizations()->attach($this->repository->organization_id);
-
-        $mockClient = new MockClient([
-            GetWorkflowJobsRequest::class => MockResponse::make([
-                "jobs" => [
-                    [
-                        "id" => 123,
-                        "name" => "job1",
-                        "started_at" => "2024-06-19T08:25:09Z",
-                        "completed_at" => "2024-06-19T08:26:09Z",
-                        "conclusion" => "success",
-                        "labels" => [
-                            "ubuntu-latest",
-                        ],
-                    ],
-                ],
-            ], 200),
-        ]);
-
-        $this->githubConnector->withMockClient($mockClient);
-
-        $this->expectException(UnauthorizedException::class);
 
         $this->fetchWorkflowJobsService->fetchWorkflowJobs($this->workflowRunDto, $this->user->id);
 

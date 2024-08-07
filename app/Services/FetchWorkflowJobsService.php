@@ -43,7 +43,6 @@ class FetchWorkflowJobsService
 
         $userOrganizationExists = $user->organizations()
             ->where("organization_id", $organization->id)
-            ->where("is_admin", true)
             ->exists();
 
         if ($userOrganizationExists) {
