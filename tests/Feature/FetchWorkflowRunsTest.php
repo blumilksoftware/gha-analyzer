@@ -11,6 +11,7 @@ use App\Http\Integrations\Requests\GetWorkflowRunsRequest;
 use App\Models\Organization;
 use App\Models\Repository;
 use App\Models\User;
+use App\Models\WorkflowActor;
 use App\Services\FetchWorkflowRunsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\UnauthorizedException;
@@ -24,6 +25,7 @@ class FetchWorkflowRunsTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+    protected WorkflowActor $actor;
     protected Repository $repository;
     protected Organization $organization;
     protected FetchWorkflowRunsService $fetchWorkflowRunsService;
@@ -37,6 +39,7 @@ class FetchWorkflowRunsTest extends TestCase
 
         $this->githubConnector = new GithubConnector();
         $this->user = User::factory()->create();
+        $this->actor = WorkflowActor::factory()->create();
         $this->repository = Repository::factory()->create();
         $this->repositoryDto = new RepositoryDTO(
             $this->repository->github_id,
@@ -61,6 +64,11 @@ class FetchWorkflowRunsTest extends TestCase
                         "id" => 123,
                         "name" => "run1",
                         "created_at" => "2024-06-19T08:25:09Z",
+                        "actor" => [
+                            "id" => 321,
+                            "login" => "actor21",
+                            "avatar_url" => "http://localhost/actor21.png",
+                        ],
                     ],
                 ],
             ], 200),
@@ -76,6 +84,49 @@ class FetchWorkflowRunsTest extends TestCase
             "repository_id" => $this->repository->id,
             "github_created_at" => "2024-06-19T08:25:09Z",
         ]);
+
+        $this->assertDatabaseCount("workflow_actors", 2);
+
+        $this->assertDatabaseHas("workflow_actors", [
+            "github_id" => 321,
+            "name" => "actor21",
+            "avatar_url" => "http://localhost/actor21.png",
+        ]);
+    }
+
+    public function testFetchWorkflowRunsWithKnownActor(): void
+    {
+        $this->user->organizations()->attach($this->repository->organization_id, ["is_admin" => true]);
+
+        $mockClient = new MockClient([
+            GetWorkflowRunsRequest::class => MockResponse::make([
+                "workflow_runs" => [
+                    [
+                        "id" => 123,
+                        "name" => "run1",
+                        "created_at" => "2024-06-19T08:25:09Z",
+                        "actor" => [
+                            "id" => $this->actor->github_id,
+                            "login" => $this->actor->name,
+                            "avatar_url" => $this->actor->avatar_url,
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $this->githubConnector->withMockClient($mockClient);
+
+        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto, $this->user->id);
+
+        $this->assertDatabaseHas("workflow_runs", [
+            "github_id" => 123,
+            "name" => "run1",
+            "repository_id" => $this->repository->id,
+            "github_created_at" => "2024-06-19T08:25:09Z",
+        ]);
+
+        $this->assertDatabaseCount("workflow_actors", 1);
     }
 
     public function testFetchWorkflowRunsWithMemberUser(): void
@@ -89,6 +140,11 @@ class FetchWorkflowRunsTest extends TestCase
                         "id" => 123,
                         "name" => "run1",
                         "created_at" => "2024-06-19T08:25:09Z",
+                        "actor" => [
+                            "id" => 321,
+                            "login" => "actor21",
+                            "avatar_url" => "http://localhost/actor21.png",
+                        ],
                     ],
                 ],
             ], 200),
@@ -105,6 +161,12 @@ class FetchWorkflowRunsTest extends TestCase
             "name" => "run1",
             "repository_id" => $this->repository->id,
             "github_created_at" => "2024-06-19T08:25:09Z",
+        ]);
+
+        $this->assertDatabaseMissing("workflow_actors", [
+            "github_id" => 321,
+            "name" => "actor21",
+            "avatar_url" => "http://localhost/actor21.png",
         ]);
     }
 
@@ -117,6 +179,11 @@ class FetchWorkflowRunsTest extends TestCase
                         "id" => 123,
                         "name" => "run1",
                         "created_at" => "2024-06-19T08:25:09Z",
+                        "actor" => [
+                            "id" => 321,
+                            "login" => "actor21",
+                            "avatar_url" => "http://localhost/actor21.png",
+                        ],
                     ],
                 ],
             ], 200),
@@ -133,6 +200,17 @@ class FetchWorkflowRunsTest extends TestCase
             "name" => "run1",
             "repository_id" => $this->repository->id,
             "github_created_at" => "2024-06-19T08:25:09Z",
+            "actor" => [
+                "id" => 321,
+                "login" => "actor21",
+                "avatar_url" => "http://localhost/actor21.png",
+            ],
+        ]);
+
+        $this->assertDatabaseMissing("workflow_actors", [
+            "github_id" => 321,
+            "name" => "actor21",
+            "avatar_url" => "http://localhost/actor21.png",
         ]);
     }
 

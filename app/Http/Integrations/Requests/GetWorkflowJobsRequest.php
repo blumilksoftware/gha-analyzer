@@ -41,6 +41,10 @@ class GetWorkflowJobsRequest extends Request
 
         if ($response->json() !== null) {
             foreach ($response->json()["jobs"] as $data) {
+                if ($data["conclusion"] === "skipped") {
+                    continue;
+                }
+
                 $jobTime = $calculateJobTimeService->calculate($data["started_at"], $data["completed_at"]);
                 $runnerData = $getRunnerDataService->getRunnerData($data["labels"]);
 

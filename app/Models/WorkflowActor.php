@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
@@ -17,42 +16,34 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int $id
  * @property int $github_id
  * @property string $name
- * @property int $organization_id
- * @property boolean $is_private
+ * @property string $avatar_url
  * @property Carbon $created_at
  * @property Carbon $updated_at
  *
  * @property float $totalMinutes
  * @property float $totalPrice
  *
- * @property Organization $organization
  * @property Collection<WorkflowRun> $workflowRuns
  * @property Collection<WorkflowJob> $workflowJobs
  */
-class Repository extends Model
+class WorkflowActor extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        "github_id",
         "name",
-        "organization_id",
-        "is_private",
+        "github_id",
+        "avatar_url",
     ];
 
     public function workflowRuns(): HasMany
     {
-        return $this->HasMany(WorkflowRun::class);
+        return $this->hasMany(WorkflowRun::class);
     }
 
     public function workflowJobs(): HasManyThrough
     {
         return $this->HasManyThrough(WorkflowJob::class, WorkflowRun::class);
-    }
-
-    public function organization(): BelongsTo
-    {
-        return $this->BelongsTo(Organization::class);
     }
 
     protected function totalMinutes(): Attribute
