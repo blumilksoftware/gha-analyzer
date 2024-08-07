@@ -12,9 +12,10 @@ Route::middleware("auth")->group(function (): void {
     Route::get("/table", [TableController::class, "show"]);
     Route::get("/repositories", [RepositoriesController::class, "show"]);
     Route::get("/authors", [AuthorsController::class, "show"]);
+    Route::get("/auth/logout", [GithubController::class, "logout"])->name("logout");
 
-    Route::get("/{organizationId}/fetch", [GithubController::class, "fetchData"])->middleware("auth");
-});
+    Route::get("/{organizationId}/fetch", [GithubController::class, "fetchData"]);
+})->middleware("auth");
 
 Route::redirect("/", "table");
 Route::get("/auth/login", [GithubController::class, "login"])->name("login");
