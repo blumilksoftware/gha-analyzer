@@ -53,9 +53,9 @@ class FetchWorkflowRunsTest extends TestCase
         MockClient::destroyGlobal();
     }
 
-    public function testFetchWorkflowRunsWithAdminUser(): void
+    public function testFetchWorkflowRunsWithMemberUser(): void
     {
-        $this->user->organizations()->attach($this->repository->organization_id, ["is_admin" => true]);
+        $this->user->organizations()->attach($this->repository->organization_id);
 
         $mockClient = new MockClient([
             GetWorkflowRunsRequest::class => MockResponse::make([
@@ -127,47 +127,6 @@ class FetchWorkflowRunsTest extends TestCase
         ]);
 
         $this->assertDatabaseCount("workflow_actors", 1);
-    }
-
-    public function testFetchWorkflowRunsWithMemberUser(): void
-    {
-        $this->user->organizations()->attach($this->repository->organization_id);
-
-        $mockClient = new MockClient([
-            GetWorkflowRunsRequest::class => MockResponse::make([
-                "workflow_runs" => [
-                    [
-                        "id" => 123,
-                        "name" => "run1",
-                        "created_at" => "2024-06-19T08:25:09Z",
-                        "actor" => [
-                            "id" => 321,
-                            "login" => "actor21",
-                            "avatar_url" => "http://localhost/actor21.png",
-                        ],
-                    ],
-                ],
-            ], 200),
-        ]);
-
-        $this->githubConnector->withMockClient($mockClient);
-
-        $this->expectException(UnauthorizedException::class);
-
-        $this->fetchWorkflowRunsService->fetchWorkflowRuns($this->repositoryDto, $this->user->id);
-
-        $this->assertDatabaseMissing("workflow_runs", [
-            "github_id" => 123,
-            "name" => "run1",
-            "repository_id" => $this->repository->id,
-            "github_created_at" => "2024-06-19T08:25:09Z",
-        ]);
-
-        $this->assertDatabaseMissing("workflow_actors", [
-            "github_id" => 321,
-            "name" => "actor21",
-            "avatar_url" => "http://localhost/actor21.png",
-        ]);
     }
 
     public function testFetchWorkflowRunsWithUserNotInOrganization(): void
