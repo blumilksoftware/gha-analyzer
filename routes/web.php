@@ -13,6 +13,7 @@ Route::middleware("auth")->group(function (): void {
     Route::get("/table", [TableController::class, "show"]);
     Route::get("/repositories", [RepositoriesController::class, "show"]);
     Route::get("/authors", [AuthorsController::class, "show"]);
+    Route::get("/auth/logout", [GithubController::class, "logout"])->name("logout");
 
     Route::get("/organization", [OrganizationController::class, "show"]);
     Route::post("/organization/{organizationId}/fetch", [OrganizationController::class, "fetchData"]);
