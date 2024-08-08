@@ -47,9 +47,7 @@ class OrganizationController extends Controller
             return response()->json(["message" => "please wait"], Response::HTTP_CONFLICT);
         }
 
-        $jobs = [
-            new FetchRepositoriesJob($organizationId, Auth::user()->id),
-        ];
+        $jobs = [new FetchRepositoriesJob($organizationId, Auth::user()->id)];
 
         $organization->fetch_at = Carbon::now();
         $organization->save();
@@ -82,12 +80,12 @@ class OrganizationController extends Controller
 
     protected function findBatch(int $organizationId): ?Batch
     {
-        $batch_id = Cache::get("fetch/" . $organizationId);
+        $batchId = Cache::get("fetch/" . $organizationId);
 
-        if ($batch_id === null) {
+        if ($batchId === null) {
             return null;
         }
 
-        return Bus::findBatch($batch_id);
+        return Bus::findBatch($batchId);
     }
 }
