@@ -11,7 +11,7 @@ const emit = defineEmits(['click'])
 </script>
 
 <template>
-  <div v-if="!props.progress || props.progress.finished" class="cursor-pointer px-5 py-3 text-xs rounded-md bg-blue-500 hover:bg-blue-500/75 text-white" :class="props.class" @click="emit('click')">
+  <div v-if="!props.progress || props.progress.finished" class="cursor-pointer px-5 py-3 font-bold text-xs rounded-md bg-blue-500 hover:bg-blue-500/75 text-white" :class="props.class" @click="emit('click')">
     {{ props.text }}
   </div>
 
