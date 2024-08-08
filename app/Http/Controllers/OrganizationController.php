@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\OrganizationResource;
 use App\Jobs\FetchRepositoriesJob;
 use App\Models\Organization;
+use App\Models\User;
 use App\Services\AssignUserToOrganizationsService;
 use Carbon\Carbon;
 use Illuminate\Bus\Batch;
@@ -38,7 +39,7 @@ class OrganizationController extends Controller
         return Inertia::render("Organization", ["data" => $data, "progress" => $status]);
     }
 
-    public function fetchData(int $organizationId): JsonResponse
+    public function fetchData(int $organizationId, Request $request): JsonResponse
     {
         $organization = Organization::query()->findOrFail($organizationId);
         $batch = $this->findBatch($organizationId);
@@ -47,7 +48,8 @@ class OrganizationController extends Controller
             return response()->json(["message" => "please wait"], Response::HTTP_CONFLICT);
         }
 
-        $jobs = [new FetchRepositoriesJob($organizationId, Auth::user()->id)];
+        $user = $request->user();
+        $jobs = [new FetchRepositoriesJob($organizationId, $user->id)];
 
         $organization->fetch_at = Carbon::now();
         $organization->save();
