@@ -20,7 +20,7 @@ Route::middleware("auth")->group(function (): void {
     Route::get("/organization/{organizationId}/progress", [OrganizationController::class, "status"]);
 })->middleware("auth");
 
-Route::redirect("/", "table");
+Route::redirect("/", "organization");
 Route::get("/auth/login", [GithubController::class, "login"])->name("login");
 Route::get("/auth/redirect", [GithubController::class, "redirect"]);
 Route::get("/auth/callback", [GithubController::class, "callback"]);
