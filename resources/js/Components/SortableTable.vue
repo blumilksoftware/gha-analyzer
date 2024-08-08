@@ -1,6 +1,7 @@
 <script setup lang="ts" generic="T extends { id: number }">
 import { defineProps } from 'vue'
 import { withSort } from '@/Utils/sort'
+import { Link } from '@inertiajs/vue3'
 
 const props = defineProps<{
   data: T[]
@@ -42,6 +43,9 @@ const {sorted, sortBy} = withSort(props.data, 'id')
       </tr>
     </tbody>
   </table>
-  <h1 v-else>No logs loaded</h1>
+  <div v-else>
+    No data loaded. Go to the organization page to fetch them.
+    <Link class="cursor-pointer px-5 py-3 text-xs font-bold rounded-md bg-blue-500 hover:bg-blue-500/75 text-white ml-2" href="/organization">Navigate</Link>
+  </div>
 </template>
 
