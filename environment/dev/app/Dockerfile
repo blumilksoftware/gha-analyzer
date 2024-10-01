@@ -1,5 +1,5 @@
 # For other versions check: https://hub.docker.com/_/composer/tags
-FROM composer/composer:2.7.7-bin AS composer-bin
+FROM composer/composer:2.7.9-bin AS composer-bin
 
 # For other versions check: https://hub.docker.com/_/node/tags?page=1&name=bullseye-slim
 FROM node:22.5.1-bullseye-slim AS node
